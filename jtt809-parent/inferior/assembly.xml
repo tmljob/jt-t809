@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+    <!-- 可自定义，这里指定的是项目环境 -->
+    <!-- spring-boot-assembly-local-1.0.RELEASE.tar.gz  -->
+    <!-- 
+    <id>${project.version}</id>
+    -->
+
+    <!-- 打包的类型，如果有N个，将会打N个类型的包 -->
+    <formats>
+        <format>tar.gz</format>
+
+    </formats>
+
+    <includeBaseDirectory>true</includeBaseDirectory>
+
+    <fileSets>
+        <!--
+            0755->即用户具有读/写/执行权限，组用户和其它用户具有读写权限；
+            0644->即用户具有读写权限，组用户和其它用户具有只读权限；
+        -->
+        <!-- 将根目录下的所有sh&bat文件输出到打包后的根目录中 -->
+        <fileSet>
+            <directory>${basedir}</directory>
+            <outputDirectory></outputDirectory>
+            <fileMode>0755</fileMode>
+            <includes>
+                <include>**.sh</include>
+                <include>**.bat</include>
+                <include>**.db</include>
+            </includes>
+        </fileSet>
+
+        <!-- 将项目启动jar打包到目录中 -->
+        <fileSet>
+            <directory>${basedir}/target</directory>
+            <outputDirectory></outputDirectory>
+            <fileMode>0755</fileMode>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+
+        <!-- 将根目录下sql目录下的所有文件输出到打包后的sql目录中 -->
+        <fileSet>
+            <directory>${basedir}/sql</directory>
+            <outputDirectory>sql</outputDirectory>
+            <directoryMode>0644</directoryMode>
+            <fileMode>0644</fileMode>
+        </fileSet>
+
+        <!-- 将根目录下script目录下的所有文件输出到打包后的script目录中 -->
+        <fileSet>
+            <directory>${basedir}/scripts</directory>
+            <outputDirectory>scripts</outputDirectory>
+            <directoryMode>0644</directoryMode>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <!-- 将根目录下script目录下的所有文件输出到打包后的script目录中 -->
+        <fileSet>
+            <directory>${basedir}/ext</directory>
+            <outputDirectory>ext</outputDirectory>
+            <directoryMode>0644</directoryMode>
+            <fileMode>0755</fileMode>
+        </fileSet>
+
+        <!-- 将根目录下resource目录下application-prod.yml文件输出 -->
+        <fileSet>
+            <directory>src/main/resources</directory>
+            <outputDirectory></outputDirectory>
+            <fileMode>0644</fileMode>
+            <includes>
+                <include>application.properties</include>
+            </includes>
+        </fileSet>
+        
+         <!-- 添加上传文件目录 -->
+        <fileSet>
+            <directory></directory>
+            <outputDirectory>/input</outputDirectory>
+            <fileMode>0644</fileMode>
+            <includes>
+                <include></include>
+            </includes>
+        </fileSet>
+
+        <!-- 包含根目录下的文件 -->
+        <fileSet>
+            <directory>${basedir}</directory>
+            <includes>
+                <include>NOTICE</include>
+                <include>LICENSE</include>
+                <include>*.md</include>
+                <include>*.csv</include>
+            </includes>
+        </fileSet>
+
+    </fileSets>
+
+</assembly>
