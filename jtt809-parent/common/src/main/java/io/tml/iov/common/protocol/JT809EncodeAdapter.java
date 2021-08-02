@@ -27,7 +27,7 @@ public class JT809EncodeAdapter extends MessageToByteEncoder<JT809BasePacket> {
             byte[] bytes1 = CommonUtils.append(new byte[]{JT809BasePacket.HEAD_FLAG}, dataBytes);
             byte[] bytes = CommonUtils.append(bytes1, new byte[]{JT809BasePacket.END_FLAG});
             String hexStr = PacketDecoderUtils.bytes2HexStr(bytes);
-            log.info("发出的报文为：{}",hexStr);
+            log.info("send packet：{}",hexStr);
             out.writeBytes(bytes);
             
             out.retain();

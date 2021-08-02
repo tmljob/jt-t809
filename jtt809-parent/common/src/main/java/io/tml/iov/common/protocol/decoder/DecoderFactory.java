@@ -6,10 +6,7 @@ import java.util.Map;
 import io.tml.iov.common.util.constant.Const;
 
 /**
- * @Author: Xiuming Lee
- * @Date: 2019/9/21 21:13
- * @Version 1.0
- * @Describe: 解码工厂类
+ * 解码工厂类
  */
 public class DecoderFactory {
     private static Map<Short, Decoder> DECODER_FACTORY = new HashMap<>();

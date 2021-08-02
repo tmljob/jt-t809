@@ -7,26 +7,33 @@ import java.util.Enumeration;
 
 import org.aopalliance.intercept.Interceptor;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  *
  */
-public class IpUtils  implements Interceptor {
-
+@Slf4j
+public class IpUtils implements Interceptor {
 
     public static String getLinuxLocalIp() {
         String ip = "";
         try {
 
-            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+            for (Enumeration<NetworkInterface> en = NetworkInterface
+                    .getNetworkInterfaces(); en.hasMoreElements();) {
                 NetworkInterface intf = en.nextElement();
                 String name = intf.getName();
                 if (!name.contains("docker") && !name.contains("lo")) {
                     // 不含有docker和lo
-                    for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    for (Enumeration<InetAddress> enumIpAddr = intf
+                            .getInetAddresses(); enumIpAddr
+                                    .hasMoreElements();) {
                         InetAddress inAddress = enumIpAddr.nextElement();
                         if (!inAddress.isLoopbackAddress()) {
-                            String ipaddress = inAddress.getHostAddress().toString();
-                            if (!ipaddress.contains("::") && !ipaddress.contains("0:0:")
+                            String ipaddress = inAddress.getHostAddress()
+                                    .toString();
+                            if (!ipaddress.contains("::")
+                                    && !ipaddress.contains("0:0:")
                                     && !ipaddress.contains("fe80")) {
                                 ip = ipaddress;
                             }
@@ -35,7 +42,7 @@ public class IpUtils  implements Interceptor {
                 }
             }
         } catch (SocketException e) {
-            System.out.println("获取ip失败");
+            log.error("IpUtils getLinuxLocalIp error.", e);
             ip = "127.0.0.1";
         }
         return ip;

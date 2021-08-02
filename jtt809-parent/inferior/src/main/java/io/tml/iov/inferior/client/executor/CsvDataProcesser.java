@@ -41,12 +41,12 @@ public class CsvDataProcesser {
         log.info("csv path info|{}", inputPath);
         DataSender sender = DataSender.getInstance();
         sender.login2Superior();
-        
+
         synchronized (DataSender.class) {
             try {
                 DataSender.class.wait();
             } catch (Exception e) {
-               log.error("wait to login error.", e);
+                log.error("wait to login error.", e);
             }
         }
 
@@ -68,8 +68,7 @@ public class CsvDataProcesser {
                 for (String path : csvFiles) {
                     try (BufferedReader br = new BufferedReader(
                             new InputStreamReader(new FileInputStream(path),
-                                    "GBK"));
-                          ) {
+                                    "GBK"));) {
                         log.info("start process file:{}", path);
                         String line = null;
                         String[] locArray = null;
@@ -85,20 +84,22 @@ public class CsvDataProcesser {
                                 }
                                 continue;
                             }
-                           
+
                             JT809Packet0x1202 location = buildLocation(
                                     locArray);
-                            if(!sender.channelAvaliable()) {
+                            if (!sender.channelAvaliable()) {
                                 try {
                                     Thread.sleep(30 * 1000);
                                 } catch (InterruptedException e) {
-                                    log.error("CsvDataProcesser channelAvaliable error", e);
+                                    log.error(
+                                            "CsvDataProcesser channelAvaliable error",
+                                            e);
                                 }
                             }
-                            
+
                             boolean result = sender.sendMsg2Gov(location);
-                            
-                            if(result) {
+
+                            if (result) {
                                 sucessCnt++;
                             } else {
                                 failCnt++;
@@ -109,9 +110,9 @@ public class CsvDataProcesser {
                         log.error("CsvDataProcesser open file error", e2);
                     }
                 }
-                
-                log.info("data send success cnt:{}",sucessCnt);
-                log.info("data send fail cnt:{}",failCnt);
+
+                log.info("data send success cnt:{}", sucessCnt);
+                log.info("data send fail cnt:{}", failCnt);
 
                 csvFiles.forEach(path -> {
                     File file = new File(path);

@@ -22,49 +22,59 @@ import io.tml.iov.common.util.constant.Const;
  * @Describe:
  */
 public class JT809Packet0x1202Decoder implements Decoder {
-    private static Logger log = LoggerFactory.getLogger(JT809Packet0x1202Decoder.class);
+    private static Logger log = LoggerFactory
+            .getLogger(JT809Packet0x1202Decoder.class);
+
     @Override
     public JT809BasePacket decoder(byte[] bytes) throws Exception {
         JT809Packet0x1202 jt809Packet0x1202 = new JT809Packet0x1202();
-        ByteBuf byteBuf = PacketDecoderUtils.baseDecoder(bytes, jt809Packet0x1202);
-        packetDecoder(byteBuf,jt809Packet0x1202);
+        ByteBuf byteBuf = PacketDecoderUtils.baseDecoder(bytes,
+                jt809Packet0x1202);
+        packetDecoder(byteBuf, jt809Packet0x1202);
         return jt809Packet0x1202;
     }
 
-    private void packetDecoder(ByteBuf byteBuf, JT809Packet0x1202 packet) throws Exception{
+    private void packetDecoder(ByteBuf byteBuf, JT809Packet0x1202 packet)
+            throws Exception {
         ByteBuf msgBodyBuf = null;
         if (packet.getEncryptFlag() == Const.EncryptFlag.NO) {
             msgBodyBuf = PacketDecoderUtils.getMsgBodyBuf(byteBuf);
         } else {
-            log.error("报文已加密！未处理。报文信息：{}",PACKET_CACHE.get(Thread.currentThread().getName()));
+            log.error("packet is encry, not to process.packet is {}",
+                    PACKET_CACHE.get(Thread.currentThread().getName()));
             msgBodyBuf = null;
             return;
         }
         // 车牌号
-        byte [] vehicleNoBytes = new byte[21];
+        byte[] vehicleNoBytes = new byte[21];
         msgBodyBuf.readBytes(vehicleNoBytes);
-        packet.setVehicleNo(new String(vehicleNoBytes, Charset.forName("GBK")).trim());
+        packet.setVehicleNo(
+                new String(vehicleNoBytes, Charset.forName("GBK")).trim());
         // 车辆颜色
         packet.setVehicleColor(msgBodyBuf.readByte());
         // 子业务类型标识
         packet.setDataType(msgBodyBuf.readShort());
         // 如果不是定位的数据，抛出空指针错误,解码适配器会对空指针错误做处理。
-        if (packet.getDataType() != Const.SubBusinessDataType.UP_EXG_MSG_REAL_LOCATION ) {
+        if (packet
+                .getDataType() != Const.SubBusinessDataType.UP_EXG_MSG_REAL_LOCATION) {
             throw new NullPointerException();
         }
         // 后续数据长度
         packet.setDataLength(msgBodyBuf.readInt());
         // 经纬度信息是否按国标进行加密
         packet.setExcrypt(msgBodyBuf.readByte());
-        if (packet.getExcrypt() == Const.EncryptFlag.YES ){
-            log.error("车辆经纬度已加密！报文信息：{}",PACKET_CACHE.get(Thread.currentThread().getName()));
+        if (packet.getExcrypt() == Const.EncryptFlag.YES) {
+            log.error("lon/lat info is encry, packet is {}",
+                    PACKET_CACHE.get(Thread.currentThread().getName()));
         }
         // 跳过时间
 //        msgBodyBuf.skipBytes(7);
         int day = Byte.toUnsignedInt(msgBodyBuf.readByte());
         int month = Byte.toUnsignedInt(msgBodyBuf.readByte());
-        packet.setDate(LocalDate.of(msgBodyBuf.readShort(),month,day));
-        packet.setTime(LocalTime.of(Byte.toUnsignedInt(msgBodyBuf.readByte()),Byte.toUnsignedInt(msgBodyBuf.readByte()),Byte.toUnsignedInt(msgBodyBuf.readByte())));
+        packet.setDate(LocalDate.of(msgBodyBuf.readShort(), month, day));
+        packet.setTime(LocalTime.of(Byte.toUnsignedInt(msgBodyBuf.readByte()),
+                Byte.toUnsignedInt(msgBodyBuf.readByte()),
+                Byte.toUnsignedInt(msgBodyBuf.readByte())));
         // 经纬度
         packet.setLon(msgBodyBuf.readInt());
         packet.setLat(msgBodyBuf.readInt());
@@ -83,7 +93,5 @@ public class JT809Packet0x1202Decoder implements Decoder {
         // 报警状态
         packet.setAlarm(msgBodyBuf.readInt());
     }
-
-
 
 }

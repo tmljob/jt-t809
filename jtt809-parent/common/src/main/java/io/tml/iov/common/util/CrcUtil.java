@@ -28,7 +28,7 @@ public class CrcUtil {
             log.info("crc code is {} ", oldCRCcode);
             return true;
         }
-        log.error("crc校验失败;报文信息：{}",
+        log.error("crc check error, packet is {}",
                 CommonUtils.PACKET_CACHE.get(Thread.currentThread().getName()));
         return false;
     }

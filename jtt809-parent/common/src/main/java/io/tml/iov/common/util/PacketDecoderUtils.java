@@ -14,11 +14,11 @@ public class PacketDecoderUtils {
 
     public static byte[] decoderEscape(ByteBuf buf) {
         byte[] originalPacket = CommonUtils.getByteArray(buf);
-       log.info("收到的原始报文:{}",bytes2HexStr(originalPacket));
+       log.info("received packet:{}",bytes2HexStr(originalPacket));
         byte[] correctPacket = decoderEscape(originalPacket);
         StringBuilder packetInfo = new StringBuilder();
-        packetInfo.append("原始报文：").append(bytes2HexStr(originalPacket))
-                .append("；转义后的报文：").append(bytes2HexStr(correctPacket));
+        packetInfo.append("original packet：").append(bytes2HexStr(originalPacket))
+                .append(";escaped packet:").append(bytes2HexStr(correctPacket));
         PACKET_CACHE.put(Thread.currentThread().getName(),
                 packetInfo.toString());
         return correctPacket;
