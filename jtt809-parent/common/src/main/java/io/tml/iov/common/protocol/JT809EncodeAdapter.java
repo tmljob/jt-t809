@@ -1,8 +1,5 @@
 package io.tml.iov.common.protocol;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -16,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class JT809EncodeAdapter extends MessageToByteEncoder<JT809BasePacket> {
-    private static Logger log = LoggerFactory
-            .getLogger(JT809EncodeAdapter.class);
 
     @Override
     protected void encode(ChannelHandlerContext ctx, JT809BasePacket packet,

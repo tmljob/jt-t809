@@ -228,7 +228,7 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             // 方向
             buffer.writeShort(getDirection());// 2
             // 海拔
-            buffer.writeShort((short) 0);// 2
+            buffer.writeShort(getAltitude());// 2
             // 车辆状态
             int accStatus = 0;
             int gpsStatus = 0;

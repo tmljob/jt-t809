@@ -17,12 +17,17 @@ public class CsvDataProcesser {
 
     private static final String INPUT_DIR = "/input/";
     private static final String SUFFIX = "csv";
+    
+    private static final int CSV_COLUMN_LIMIT = 8;
 
     private static final int VEHICLENO_INDEX = 0;
     private static final int LON_INDEX = 1;
     private static final int LAT_INDEX = 2;
     private static final int VEC1_INDEX = 3;
-    private static final int DIRECTION_INDEX = 4;
+    private static final int VEC2_INDEX = 4;
+    private static final int VEC3_INDEX = 5;
+    private static final int DIRECTION_INDEX = 6;
+    private static final int ALTUTIDE_INDEX = 7;
 
     private static JT809Packet0x1202 buildLocation(String[] locArray) {
         JT809Packet0x1202 location = new JT809Packet0x1202();
@@ -32,6 +37,9 @@ public class CsvDataProcesser {
         location.setLat(
                 CommonUtils.formatLonLat(Double.valueOf(locArray[LAT_INDEX])));
         location.setVec1(Short.valueOf(locArray[VEC1_INDEX]));
+        location.setVec2(Short.valueOf(locArray[VEC2_INDEX]));
+        location.setVec3(Short.valueOf(locArray[VEC3_INDEX]));
+        location.setAltitude(Short.valueOf(locArray[ALTUTIDE_INDEX]));
         location.setVehicleNo(locArray[VEHICLENO_INDEX]);
         return location;
     }
@@ -76,8 +84,8 @@ public class CsvDataProcesser {
                         while ((line = br.readLine()) != null) {
                             lineNum++;
                             locArray = line.split(",|\t");
-                            if (lineNum == 1 || locArray.length < 5) {
-                                if (locArray.length < 5) {
+                            if (lineNum == 1 || locArray.length < CSV_COLUMN_LIMIT) {
+                                if (locArray.length < CSV_COLUMN_LIMIT) {
                                     log.info(
                                             "data parser error,File:{},line num:{}",
                                             path, lineNum);
