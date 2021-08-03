@@ -1,6 +1,8 @@
 package io.tml.iov.common.packet;
 
+import io.tml.iov.common.config.EncryptConfig;
 import io.tml.iov.common.util.CommonUtils;
+import io.tml.iov.common.util.Jtt809Util;
 import io.tml.iov.common.util.constant.Const;
 
 /**
@@ -15,14 +17,15 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
         setMsgSn(Const.getMsgSN());
         setMsgId(Const.BusinessDataType.UP_CONNECT_RSP);
         setMsgGNSSCenterId(Const.UserInfo.MSG_GNSSCENTERID);
-        setVersionFlag(new byte[]{1,0,0});
-        setEncryptFlag(Const.EncryptFlag.NO);
+        setVersionFlag(new byte[] { 1, 0, 0 });
+        // 加密配置
+        setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
         setEncryptKey(0);
     }
 
-    /** 标志 1位*/
+    /** 标志 1位 */
     private byte resul;
-    /** 校验码 4字节*/
+    /** 校验码 4字节 */
     private int verifyCode;
 
     public byte getResul() {
@@ -44,15 +47,21 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
     @Override
     public byte[] getMsgBodyByteArr() {
         byte[] verifyCodeBytes = CommonUtils.int2bytes(this.verifyCode);
-        return CommonUtils.append(new byte[]{this.resul},verifyCodeBytes);
+        byte[] msgBody = CommonUtils.append(new byte[] { this.resul },
+                verifyCodeBytes);
+        if (EncryptConfig.getInstance().getEncryptFlag() == Const.SWITCH_ON) {
+            msgBody = Jtt809Util.encrypt(EncryptConfig.getInstance().getM1(),
+                    EncryptConfig.getInstance().getIa1(),
+                    EncryptConfig.getInstance().getIc1(), getEncryptKey(),
+                    msgBody);
+        }
+
+        return msgBody;
     }
 
     @Override
     public String toString() {
-        return "JT809LoginResponsePacket{" +
-                "resul=" + resul +
-                ", verifyCode=" + verifyCode +
-                super.toString() +
-                '}';
+        return "JT809LoginResponsePacket{" + "resul=" + resul + ", verifyCode="
+                + verifyCode + super.toString() + '}';
     }
 }

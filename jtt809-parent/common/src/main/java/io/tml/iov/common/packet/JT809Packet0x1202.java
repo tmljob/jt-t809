@@ -8,7 +8,9 @@ import java.util.Date;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.tml.iov.common.config.EncryptConfig;
 import io.tml.iov.common.util.CommonUtils;
+import io.tml.iov.common.util.Jtt809Util;
 import io.tml.iov.common.util.constant.Const;
 
 /**
@@ -24,7 +26,8 @@ public class JT809Packet0x1202 extends JT809BasePacket {
         setMsgId(Const.BusinessDataType.UP_EXG_MSG);
         setMsgGNSSCenterId(Const.UserInfo.MSG_GNSSCENTERID);
         setVersionFlag(new byte[] { 1, 0, 0 });
-        setEncryptFlag(Const.EncryptFlag.NO);
+        // 加密配置
+        setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
         setEncryptKey(0);
     }
 
@@ -196,7 +199,8 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             buffer.writeBytes(CommonUtils.getBytesWithLengthAfter(21,
                     vehicleNo.getBytes(Charset.forName("GBK"))));// 21
             buffer.writeByte(1);// 1
-            buffer.writeShort(Const.SubBusinessDataType.UP_EXG_MSG_REAL_LOCATION);// 2
+            buffer.writeShort(
+                    Const.SubBusinessDataType.UP_EXG_MSG_REAL_LOCATION);// 2
             buffer.writeInt(36);// 4
             // 是否加密
             buffer.writeByte((byte) 0);// 0未加密 // 1
@@ -240,14 +244,23 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             // 报警状态
             buffer.writeInt(1);// 0表示正常；1表示报警//4
 
-           byte[] msgBody = new byte[buffer.readableBytes()];
-           buffer.readBytes(msgBody);
-           return msgBody;
+            byte[] msgBody = new byte[buffer.readableBytes()];
+            buffer.readBytes(msgBody);
+
+            if (EncryptConfig.getInstance()
+                    .getEncryptFlag() == Const.SWITCH_ON) {
+                msgBody = Jtt809Util.encrypt(
+                        EncryptConfig.getInstance().getM1(),
+                        EncryptConfig.getInstance().getIa1(),
+                        EncryptConfig.getInstance().getIc1(), getEncryptKey(),
+                        msgBody);
+            }
+
+            return msgBody;
         } finally {
             buffer.release();
         }
     }
-    
 
     @Override
     public String toString() {

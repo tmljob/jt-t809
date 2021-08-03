@@ -5,10 +5,10 @@ import org.apache.commons.lang3.StringUtils;
 import io.netty.channel.Channel;
 import io.tml.iov.common.packet.JT809LoginPacket;
 import io.tml.iov.common.packet.JT809Packet0x1202;
+import io.tml.iov.common.util.PropertiesUtil;
 import io.tml.iov.common.util.constant.Const;
 import io.tml.iov.inferior.client.constant.Constants;
 import io.tml.iov.inferior.client.util.IpUtils;
-import io.tml.iov.inferior.client.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -40,6 +40,12 @@ public class DataSender {
     private Channel channel = tcpclient.getChannel(
             PropertiesUtil.getString("netty.server.ip"),
             PropertiesUtil.getInteger("netty.server.port"));
+    public static int ENCRYPT_FLAG = PropertiesUtil
+            .getInteger("message.encrypt.enable");
+
+    public static int M1 = PropertiesUtil.getInteger("superior.server.m1");
+    public static int IA1 = PropertiesUtil.getInteger("superior.server.ia1");
+    public static int IC1 = PropertiesUtil.getInteger("superior.server.ic1");
 
     private static DataSender dataSender = new DataSender();
 
@@ -117,7 +123,5 @@ public class DataSender {
     public boolean channelAvaliable() {
         return null != channel && channel.isWritable();
     }
-    
-    
 
 }
