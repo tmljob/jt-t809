@@ -3,8 +3,6 @@ package io.tml.iov.common.packet;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Date;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -205,16 +203,14 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             // 是否加密
             buffer.writeByte((byte) 0);// 0未加密 // 1
             // 日月年dmyy
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(new Date());
-            buffer.writeByte((byte) cal.get(Calendar.DATE));
-            buffer.writeByte((byte) (cal.get(Calendar.MONTH) + 1));
-            String hexYear = "0" + Integer.toHexString(cal.get(Calendar.YEAR));
+            buffer.writeByte(date.getDayOfMonth());
+            buffer.writeByte(date.getMonthValue());
+            String hexYear = "0" +Integer.toHexString(date.getYear());
             buffer.writeBytes(CommonUtils.hexStringToByte(hexYear));// 4
             // 时分秒
-            buffer.writeByte((byte) cal.get(Calendar.HOUR_OF_DAY));
-            buffer.writeByte((byte) cal.get(Calendar.MINUTE));
-            buffer.writeByte((byte) cal.get(Calendar.SECOND));// 3
+            buffer.writeByte(time.getHour());
+            buffer.writeByte(time.getMinute());
+            buffer.writeByte(time.getSecond());// 3
             // 经度，纬度
             buffer.writeInt(getLon());// 4
 //            buffer.writeInt(39563620);// 4

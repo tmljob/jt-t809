@@ -29,7 +29,7 @@ public class HeartBeatHandler extends ChannelInboundHandlerAdapter {
             }
 
             if (idleStateEvent.state() == IdleState.WRITER_IDLE) {
-                log.error("the channle is idel, send heartbeat!");
+                log.info("the channle is idel, send heartbeat!");
                 JT809Heartbeat heartBeat = new JT809Heartbeat();
                 ctx.channel().writeAndFlush(heartBeat);
             }
