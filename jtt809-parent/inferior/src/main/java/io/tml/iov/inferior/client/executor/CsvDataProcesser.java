@@ -41,18 +41,18 @@ public class CsvDataProcesser {
 
     private static JT809Packet0x1202 buildLocation(String[] locArray, boolean plusDate) {
         JT809Packet0x1202 location = new JT809Packet0x1202();
-        location.setDirection(Short.valueOf(locArray[DIRECTION_INDEX]));
+        location.setDirection(Short.valueOf(locArray[DIRECTION_INDEX].trim()));
         location.setLon(
-                CommonUtils.formatLonLat(Double.valueOf(locArray[LON_INDEX])));
+                CommonUtils.formatLonLat(Double.valueOf(locArray[LON_INDEX].trim())));
         location.setLat(
-                CommonUtils.formatLonLat(Double.valueOf(locArray[LAT_INDEX])));
-        location.setVec1(Short.valueOf(locArray[VEC1_INDEX]));
-        location.setVec2(Short.valueOf(locArray[VEC2_INDEX]));
-        location.setVec3(Short.valueOf(locArray[VEC3_INDEX]));
-        location.setAltitude(Short.valueOf(locArray[ALTUTIDE_INDEX]));
-        location.setVehicleNo(locArray[VEHICLENO_INDEX]);
+                CommonUtils.formatLonLat(Double.valueOf(locArray[LAT_INDEX].trim())));
+        location.setVec1(Short.valueOf(locArray[VEC1_INDEX].trim()));
+        location.setVec2(Short.valueOf(locArray[VEC2_INDEX].trim()));
+        location.setVec3(Short.valueOf(locArray[VEC3_INDEX].trim()));
+        location.setAltitude(Short.valueOf(locArray[ALTUTIDE_INDEX].trim()));
+        location.setVehicleNo(locArray[VEHICLENO_INDEX].trim());
         if(plusDate) {
-            String dateStr = locArray[DATE_INDEX];
+            String dateStr = locArray[DATE_INDEX].trim();
             LocalDate localDate = LocalDate.parse(dateStr, formatter);
             LocalTime localTime = LocalTime.parse(dateStr, formatter);
             location.setDate(localDate);
