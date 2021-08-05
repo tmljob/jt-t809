@@ -14,6 +14,7 @@ import io.tml.iov.common.util.CommonUtils;
 import io.tml.iov.common.util.PropertiesUtil;
 import io.tml.iov.common.util.constant.Const;
 import io.tml.iov.inferior.client.DataSender;
+import io.tml.iov.inferior.client.DownLinkServer;
 import io.tml.iov.inferior.client.util.PathHelper;
 import lombok.extern.slf4j.Slf4j;
 
@@ -76,9 +77,15 @@ public class CsvDataProcesser {
                 : false;
         String inputPath = PathHelper.getRootPath() + INPUT_DIR;
         log.info("csv path info|{}", inputPath);
+        
+        DownLinkServer downLinkServer = new DownLinkServer();
+        downLinkServer.starDownLinkServer();
+
+        
         DataSender sender = DataSender.getInstance();
         sender.login2Superior();
-
+        
+       
         synchronized (DataSender.class) {
             try {
                 DataSender.class.wait();

@@ -51,7 +51,7 @@ public class DataSender {
 
     public static DataSender getInstance() {
         // 获取本机IP对应的用户名密码,IpUtils自己实现一个，就是获取本地IP的，因为有的城市的交委会给每个服务器一个账号密码
-        String localIp = IpUtils.getLinuxLocalIp();
+        String localIp = IpUtils.getIpAddress();
         if (StringUtils.isNotBlank(localIp)) {
             PLANT_CODE = PropertiesUtil.getInteger("netty.server.centerId");
             COM_ID = PropertiesUtil.getInteger("netty.server.userid");

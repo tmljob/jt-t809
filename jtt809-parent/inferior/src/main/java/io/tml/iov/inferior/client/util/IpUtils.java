@@ -1,5 +1,6 @@
 package io.tml.iov.inferior.client.util;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -47,5 +48,31 @@ public class IpUtils implements Interceptor {
         }
         return ip;
     }
+    
+    public static String getIpAddress() {
+        try {
+          Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+          InetAddress ip = null;
+          while (allNetInterfaces.hasMoreElements()) {
+            NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
+            if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
+              continue;
+            } else {
+              Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+              while (addresses.hasMoreElements()) {
+                ip = addresses.nextElement();
+                if (ip != null && ip instanceof Inet4Address) {
+                  return ip.getHostAddress();
+                }
+              }
+            }
+          }
+        } catch (Exception e) {
+            log.error("getIpAddress error",e);
+        }
+        return "";
+      }
+ 
+
 
 }
