@@ -3,9 +3,7 @@ package io.tml.iov.common.config;
 import io.tml.iov.common.util.PropertiesUtil;
 
 public class EncryptConfig {
-
-    private static EncryptConfig instance = new EncryptConfig();
-
+  
     private int encryptFlag;
     private int m1;
     private int ia1;
@@ -18,11 +16,12 @@ public class EncryptConfig {
         ic1 = PropertiesUtil.getInteger("superior.server.ic1");
     }
     
+    private static class EncryptConfigHolder {
+        private static EncryptConfig instance = new EncryptConfig();
+    }
+
     public static EncryptConfig getInstance() {
-        if(null == instance) {
-            instance = new EncryptConfig();
-        }
-        return instance;
+      return EncryptConfigHolder.instance;
     }
 
     public int getM1() {
