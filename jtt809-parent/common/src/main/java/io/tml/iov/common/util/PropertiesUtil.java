@@ -60,5 +60,13 @@ public class PropertiesUtil {
         }
         return Integer.parseInt(value.trim());
     }
+    
+    public static String getProperty(String key,String defaultValue){
+        String value = props.getProperty(key.trim());
+        if(value.isEmpty()){
+            value = defaultValue;
+        }
+        return value.trim();
+    }
 
 }

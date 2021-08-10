@@ -1,5 +1,8 @@
 package io.tml.iov.inferior.client.executor;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import io.tml.iov.common.packet.JT809Packet0x1202;
 import io.tml.iov.common.util.CommonUtils;
 import io.tml.iov.inferior.client.DataSender;
@@ -16,6 +19,8 @@ public class TaskExecutor {
         location.setLat(CommonUtils.formatLonLat(Double.valueOf("39.563628")));
         location.setVec1((short) 45);
         location.setVehicleNo("皖A66M27");
+        location.setDate(LocalDate.now());
+        location.setTime(LocalTime.now());
         s.sendMsg2Gov(location);
         while (true) {
             try {
