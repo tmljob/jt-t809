@@ -73,16 +73,6 @@
                 <include>application.properties</include>
             </includes>
         </fileSet>
-        
-         <!-- 添加上传文件目录 -->
-        <fileSet>
-            <directory></directory>
-            <outputDirectory>/input</outputDirectory>
-            <fileMode>0644</fileMode>
-            <includes>
-                <include></include>
-            </includes>
-        </fileSet>
 
         <!-- 包含根目录下的文件 -->
         <fileSet>
