@@ -23,10 +23,10 @@ public class JT809Packet0x1202 extends JT809BasePacket {
         setMsgSn(Const.getMsgSN());
         setMsgId(Const.BusinessDataType.UP_EXG_MSG);
         setMsgGNSSCenterId(Const.UserInfo.MSG_GNSSCENTERID);
-        setVersionFlag(new byte[] { 1, 0, 0 });
+//        setVersionFlag(new byte[] { 1, 0, 0 });
         // 加密配置
-        setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
-        setEncryptKey(0);
+//        setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
+//        setEncryptKey(0);
     }
 
     /** 车牌号 21字节 */
@@ -243,8 +243,7 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             byte[] msgBody = new byte[buffer.readableBytes()];
             buffer.readBytes(msgBody);
 
-            if (EncryptConfig.getInstance()
-                    .getEncryptFlag() == Const.SWITCH_ON) {
+            if (this.getEncryptFlag() == Const.SWITCH_ON) {
                 msgBody = Jtt809Util.encrypt(
                         EncryptConfig.getInstance().getM1(),
                         EncryptConfig.getInstance().getIa1(),

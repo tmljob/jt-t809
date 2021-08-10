@@ -3,6 +3,7 @@ package io.tml.iov.inferior.client.executor;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import io.tml.iov.common.config.EncryptConfig;
 import io.tml.iov.common.packet.JT809Packet0x1202;
 import io.tml.iov.common.util.CommonUtils;
 import io.tml.iov.inferior.client.DataSender;
@@ -21,6 +22,8 @@ public class TaskExecutor {
         location.setVehicleNo("皖A66M27");
         location.setDate(LocalDate.now());
         location.setTime(LocalTime.now());
+        location.setEncryptFlag(
+                (byte) EncryptConfig.getInstance().getEncryptFlag());
         s.sendMsg2Gov(location);
         while (true) {
             try {

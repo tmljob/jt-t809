@@ -10,8 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.buffer.ByteBuf;
+import io.tml.iov.common.config.EncryptConfig;
 import io.tml.iov.common.packet.JT809BasePacket;
 import io.tml.iov.common.packet.JT809Packet0x1202;
+import io.tml.iov.common.util.CommonUtils;
+import io.tml.iov.common.util.Jtt809Util;
 import io.tml.iov.common.util.PacketDecoderUtils;
 import io.tml.iov.common.util.constant.Const;
 
@@ -40,10 +43,14 @@ public class JT809Packet0x1202Decoder implements Decoder {
         if (packet.getEncryptFlag() == Const.EncryptFlag.NO) {
             msgBodyBuf = PacketDecoderUtils.getMsgBodyBuf(byteBuf);
         } else {
-            log.error("packet is encry, not to process.packet is {}",
-                    PACKET_CACHE.get(Thread.currentThread().getName()));
-            msgBodyBuf = null;
-            return;
+            log.info("packet is encry, continue to process.");
+            byte[] msgBodyArr = Jtt809Util.encrypt(
+                    EncryptConfig.getInstance().getM1(),
+                    EncryptConfig.getInstance().getIa1(),
+                    EncryptConfig.getInstance().getIc1(),
+                    packet.getEncryptKey(),
+                    PacketDecoderUtils.getMsgBodyByteArr(byteBuf));
+            msgBodyBuf = CommonUtils.getByteBuf(msgBodyArr);
         }
         // 车牌号
         byte[] vehicleNoBytes = new byte[21];

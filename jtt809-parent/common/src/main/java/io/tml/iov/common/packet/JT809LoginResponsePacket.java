@@ -17,10 +17,10 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
         setMsgSn(Const.getMsgSN());
         setMsgId(Const.BusinessDataType.UP_CONNECT_RSP);
         setMsgGNSSCenterId(Const.UserInfo.MSG_GNSSCENTERID);
-        setVersionFlag(new byte[] { 1, 0, 0 });
+//        setVersionFlag(new byte[] { 1, 0, 0 });
         // 加密配置
-        setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
-        setEncryptKey(0);
+//        setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
+//        setEncryptKey(0);
     }
 
     /** 标志 1位 */
@@ -49,7 +49,7 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
         byte[] verifyCodeBytes = CommonUtils.int2bytes(this.verifyCode);
         byte[] msgBody = CommonUtils.append(new byte[] { this.resul },
                 verifyCodeBytes);
-        if (EncryptConfig.getInstance().getEncryptFlag() == Const.SWITCH_ON) {
+        if (this.getEncryptFlag() == Const.SWITCH_ON) {
             msgBody = Jtt809Util.encrypt(EncryptConfig.getInstance().getM1(),
                     EncryptConfig.getInstance().getIa1(),
                     EncryptConfig.getInstance().getIc1(), getEncryptKey(),

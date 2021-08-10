@@ -33,7 +33,7 @@ public abstract class JT809BasePacket {
      *  的版本号是 v1.2.15，以此类推。
      *  Hex编码 ,这个是3个字节，需要注意
      */
-    private byte[] versionFlag;
+    private byte[] versionFlag = new byte[] { 1, 0, 0 };
     /** 报文加密标识位 b: 0 表示报文不加密，1 表示报文加密。0x00 0x01,这里默认不加密 1字节*/
     private byte encryptFlag = 0x00;
     /** 数据加密的密匙，长度为 4 个字节*/

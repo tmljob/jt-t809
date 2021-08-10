@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.tml.iov.common.config.EncryptConfig;
 import io.tml.iov.common.packet.JT809LoginPacket;
 import io.tml.iov.common.packet.JT809LoginResponsePacket;
 import io.tml.iov.common.util.constant.Const;
@@ -24,6 +25,8 @@ public class JT809LoginHandler extends SimpleChannelInboundHandler<JT809LoginPac
         byte LoginResponseCode = valid(msg);
         loginResponsePacket.setResul(LoginResponseCode);
         loginResponsePacket.setVerifyCode(0);
+        
+        loginResponsePacket.setEncryptFlag((byte)EncryptConfig.getInstance().getEncryptFlag());
         // 登录响应
         ctx.channel().writeAndFlush(loginResponsePacket);
     }
