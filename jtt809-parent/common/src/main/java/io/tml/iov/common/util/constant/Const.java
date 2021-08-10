@@ -10,6 +10,8 @@ public class Const {
         msg_sn += 1;
         return msg_sn;
     }
+    
+    public static int SWITCH_ON = 1;
 
     /** 业务数据类型标志*/
      public interface BusinessDataType{

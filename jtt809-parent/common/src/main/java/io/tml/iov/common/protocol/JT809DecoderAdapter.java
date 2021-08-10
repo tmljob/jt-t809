@@ -20,17 +20,20 @@ import io.tml.iov.common.util.PacketDecoderUtils;
  * @Describe: 解码器
  */
 public class JT809DecoderAdapter extends ByteToMessageDecoder {
-    private static Logger log = LoggerFactory.getLogger(JT809DecoderAdapter.class);
+    private static Logger log = LoggerFactory
+            .getLogger(JT809DecoderAdapter.class);
+
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        //判断是否有可读的字节
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in,
+            List<Object> out) throws Exception {
+        // 判断是否有可读的字节
         if (in.readableBytes() <= 0) {
             return;
         }
         // 1、进行转义
         byte[] bytes = PacketDecoderUtils.decoderEscape(in);
         // 2、校验crc
-        if (!CrcUtil.checkCRC(bytes)){
+        if (!CrcUtil.checkCRC(bytes)) {
             return;
         }
         // 3、判断是那种类型的数据，交给具体的解码器类完成。
@@ -48,7 +51,9 @@ public class JT809DecoderAdapter extends ByteToMessageDecoder {
                 // log.info("没有可用的解析器，忽略这条信息！此信息不在业务范围内。");
                 // 没有可用的解析器，忽略这条信息！此信息不在业务范围内。
             } else {
-                log.error("报文解析出错！错误信息：{}；报文信息：{}；",e.getMessage(),PACKET_CACHE.get(Thread.currentThread().getName()));
+                log.error("packet paser error！ error info:{};packet info:{}",
+                        e.getMessage(),
+                        PACKET_CACHE.get(Thread.currentThread().getName()));
             }
             return;
         }

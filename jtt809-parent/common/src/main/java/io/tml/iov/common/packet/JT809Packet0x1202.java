@@ -3,12 +3,12 @@ package io.tml.iov.common.packet;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Date;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.tml.iov.common.config.EncryptConfig;
 import io.tml.iov.common.util.CommonUtils;
+import io.tml.iov.common.util.Jtt809Util;
 import io.tml.iov.common.util.constant.Const;
 
 /**
@@ -24,7 +24,8 @@ public class JT809Packet0x1202 extends JT809BasePacket {
         setMsgId(Const.BusinessDataType.UP_EXG_MSG);
         setMsgGNSSCenterId(Const.UserInfo.MSG_GNSSCENTERID);
         setVersionFlag(new byte[] { 1, 0, 0 });
-        setEncryptFlag(Const.EncryptFlag.NO);
+        // 加密配置
+        setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
         setEncryptKey(0);
     }
 
@@ -196,21 +197,20 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             buffer.writeBytes(CommonUtils.getBytesWithLengthAfter(21,
                     vehicleNo.getBytes(Charset.forName("GBK"))));// 21
             buffer.writeByte(1);// 1
-            buffer.writeShort(Const.SubBusinessDataType.UP_EXG_MSG_REAL_LOCATION);// 2
+            buffer.writeShort(
+                    Const.SubBusinessDataType.UP_EXG_MSG_REAL_LOCATION);// 2
             buffer.writeInt(36);// 4
             // 是否加密
             buffer.writeByte((byte) 0);// 0未加密 // 1
             // 日月年dmyy
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(new Date());
-            buffer.writeByte((byte) cal.get(Calendar.DATE));
-            buffer.writeByte((byte) (cal.get(Calendar.MONTH) + 1));
-            String hexYear = "0" + Integer.toHexString(cal.get(Calendar.YEAR));
+            buffer.writeByte(date.getDayOfMonth());
+            buffer.writeByte(date.getMonthValue());
+            String hexYear = "0" +Integer.toHexString(date.getYear());
             buffer.writeBytes(CommonUtils.hexStringToByte(hexYear));// 4
             // 时分秒
-            buffer.writeByte((byte) cal.get(Calendar.HOUR_OF_DAY));
-            buffer.writeByte((byte) cal.get(Calendar.MINUTE));
-            buffer.writeByte((byte) cal.get(Calendar.SECOND));// 3
+            buffer.writeByte(time.getHour());
+            buffer.writeByte(time.getMinute());
+            buffer.writeByte(time.getSecond());// 3
             // 经度，纬度
             buffer.writeInt(getLon());// 4
 //            buffer.writeInt(39563620);// 4
@@ -224,7 +224,7 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             // 方向
             buffer.writeShort(getDirection());// 2
             // 海拔
-            buffer.writeShort((short) 0);// 2
+            buffer.writeShort(getAltitude());// 2
             // 车辆状态
             int accStatus = 0;
             int gpsStatus = 0;
@@ -240,14 +240,23 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             // 报警状态
             buffer.writeInt(1);// 0表示正常；1表示报警//4
 
-           byte[] msgBody = new byte[buffer.readableBytes()];
-           buffer.readBytes(msgBody);
-           return msgBody;
+            byte[] msgBody = new byte[buffer.readableBytes()];
+            buffer.readBytes(msgBody);
+
+            if (EncryptConfig.getInstance()
+                    .getEncryptFlag() == Const.SWITCH_ON) {
+                msgBody = Jtt809Util.encrypt(
+                        EncryptConfig.getInstance().getM1(),
+                        EncryptConfig.getInstance().getIa1(),
+                        EncryptConfig.getInstance().getIc1(), getEncryptKey(),
+                        msgBody);
+            }
+
+            return msgBody;
         } finally {
             buffer.release();
         }
     }
-    
 
     @Override
     public String toString() {

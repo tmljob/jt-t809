@@ -11,7 +11,6 @@ import io.tml.iov.inferior.client.DataSender;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author zhaoxiao 2019/11/22
  */
 @Slf4j
 public class HeartBeatHandler extends ChannelInboundHandlerAdapter {
@@ -25,11 +24,12 @@ public class HeartBeatHandler extends ChannelInboundHandlerAdapter {
             if (StringUtils.isBlank(DataSender.LONGINSTATUS)
                     || DataSender.LOGINING.equals(DataSender.LONGINSTATUS)) {
                 DataSender.getInstance().login2Superior();
-                log.error("利用空闲心跳去登录------ 开始登录");
+                log.info(
+                        "try to login when the channel is idel ------ reday to login");
             }
 
             if (idleStateEvent.state() == IdleState.WRITER_IDLE) {
-                log.error("链路空闲，发送心跳!");
+                log.info("the channle is idel, send heartbeat!");
                 JT809Heartbeat heartBeat = new JT809Heartbeat();
                 ctx.channel().writeAndFlush(heartBeat);
             }

@@ -36,11 +36,11 @@ public class LoginDecoder implements Decoder {
     private void loginPacketDecoder(ByteBuf byteBuf,JT809LoginPacket loginPacket) throws Exception{
         ByteBuf msgBodyBuf = null;
         if (loginPacket.getEncryptFlag() == Const.EncryptFlag.NO) {
-            log.info("报文未加密！继续处理。");
+            log.info("packet no encry, contine to process.");
             msgBodyBuf = PacketDecoderUtils.getMsgBodyBuf(byteBuf);
         } else {
             // TODO: 后续处理
-            log.info("报文已加密！未处理。");
+            log.info("packet is encry, not to process.");
             msgBodyBuf = null;
             return;
         }
