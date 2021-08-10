@@ -85,7 +85,7 @@ public class DataSender {
             loginPacket.setUserId(COM_ID);
             loginPacket.setPassword(COM_PWD);
             loginPacket.setDownLinkIp(DOWN_LINK_IP);
-            loginPacket.setDownLinkPort((short) Constants.TCP_RESULT_PORT);
+            loginPacket.setDownLinkPort((short) PropertiesUtil.getInteger("downlink.port"));
             loginPacket.setMsgGNSSCenterId(PLANT_CODE);
             channel.write(loginPacket);
             LONGINSTATUS = LOGINING;
