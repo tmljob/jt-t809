@@ -24,16 +24,16 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
     }
 
     /** 标志 1位 */
-    private byte resul;
+    private byte result;
     /** 校验码 4字节 */
     private int verifyCode;
 
-    public byte getResul() {
-        return resul;
+    public byte getResult() {
+        return result;
     }
 
-    public void setResul(byte resul) {
-        this.resul = resul;
+    public void setResult(byte resul) {
+        this.result = resul;
     }
 
     public int getVerifyCode() {
@@ -47,7 +47,7 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
     @Override
     public byte[] getMsgBodyByteArr() {
         byte[] verifyCodeBytes = CommonUtils.int2bytes(this.verifyCode);
-        byte[] msgBody = CommonUtils.append(new byte[] { this.resul },
+        byte[] msgBody = CommonUtils.append(new byte[] { this.result },
                 verifyCodeBytes);
         if (this.getEncryptFlag() == Const.SWITCH_ON) {
             msgBody = Jtt809Util.encrypt(EncryptConfig.getInstance().getM1(),
@@ -61,7 +61,7 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
 
     @Override
     public String toString() {
-        return "JT809LoginResponsePacket{" + "resul=" + resul + ", verifyCode="
+        return "JT809LoginResponsePacket{" + "resul=" + result + ", verifyCode="
                 + verifyCode + super.toString() + '}';
     }
 }

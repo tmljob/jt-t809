@@ -18,7 +18,7 @@ public class CliBusiHandler
                 + Integer.toHexString(msg.getMsgId()));
         if (msg.getMsgId() == Const.BusinessDataType.UP_CONNECT_RSP) {
 //            byte[] msgBody = msg.getMsgBodyByteArr();
-            int result = msg.getResul();
+            int result = msg.getResult();
             if (result == Const.LoginResponseCode.SUCCESS) {
                 DataSender.LONGINSTATUS = Constants.LOGIN_SUCCESS;
 

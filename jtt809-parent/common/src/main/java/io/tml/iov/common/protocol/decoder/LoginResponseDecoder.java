@@ -36,7 +36,7 @@ public class LoginResponseDecoder implements Decoder {
             msgBodyBuf = CommonUtils.getByteBuf(msgBodyArr);
         }
 
-        loginResponsePacket.setResul(msgBodyBuf.readByte());;
+        loginResponsePacket.setResult(msgBodyBuf.readByte());;
 
        
     }

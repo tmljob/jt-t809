@@ -23,7 +23,7 @@ public class JT809LoginHandler extends SimpleChannelInboundHandler<JT809LoginPac
     protected void channelRead0(ChannelHandlerContext ctx, JT809LoginPacket msg){
         JT809LoginResponsePacket loginResponsePacket = new JT809LoginResponsePacket();
         byte LoginResponseCode = valid(msg);
-        loginResponsePacket.setResul(LoginResponseCode);
+        loginResponsePacket.setResult(LoginResponseCode);
         loginResponsePacket.setVerifyCode(0);
         
         loginResponsePacket.setEncryptFlag((byte)EncryptConfig.getInstance().getEncryptFlag());
