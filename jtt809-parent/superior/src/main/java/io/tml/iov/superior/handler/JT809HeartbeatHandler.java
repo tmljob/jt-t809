@@ -6,12 +6,7 @@ import io.tml.iov.common.packet.JT809BasePacket;
 import io.tml.iov.common.packet.JT809HeartbeatResponse;
 import io.tml.iov.common.util.constant.Const;
 
-/**
- * @Author: Xiuming Lee
- * @Date: 2019/9/23 14:42
- * @Version 1.0
- * @Describe:
- */
+
 public class JT809HeartbeatHandler extends SimpleChannelInboundHandler<JT809HeartbeatResponse> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, JT809HeartbeatResponse msg) throws Exception {

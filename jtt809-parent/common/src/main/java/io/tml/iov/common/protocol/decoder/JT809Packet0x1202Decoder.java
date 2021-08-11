@@ -18,12 +18,7 @@ import io.tml.iov.common.util.Jtt809Util;
 import io.tml.iov.common.util.PacketDecoderUtils;
 import io.tml.iov.common.util.constant.Const;
 
-/**
- * @Author: Xiuming Lee
- * @Date: 2019/9/23 15:21
- * @Version 1.0
- * @Describe:
- */
+
 public class JT809Packet0x1202Decoder implements Decoder {
     private static Logger log = LoggerFactory
             .getLogger(JT809Packet0x1202Decoder.class);

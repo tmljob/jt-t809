@@ -10,12 +10,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.tml.iov.common.protocol.JT809DecoderAdapter;
 import io.tml.iov.common.protocol.JT809EncodeAdapter;
 
-/**
- * @Author: Xiuming Lee
- * @Date: 2019/9/21 20:29
- * @Version 1.0
- * @Describe:
- */
+
 public class JT809ServerInitialzer extends ChannelInitializer<NioSocketChannel> {
 
     @Override

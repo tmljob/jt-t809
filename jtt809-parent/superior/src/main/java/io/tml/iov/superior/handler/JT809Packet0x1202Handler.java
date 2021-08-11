@@ -7,12 +7,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.tml.iov.common.packet.JT809Packet0x1202;
 
-/**
- * @Author: Xiuming Lee
- * @Date: 2019/9/23 16:04
- * @Version 1.0
- * @Describe:
- */
+
 public class JT809Packet0x1202Handler extends SimpleChannelInboundHandler<JT809Packet0x1202> {
     private static Logger log = LoggerFactory.getLogger(JT809Packet0x1202Handler.class);
 

@@ -11,10 +11,7 @@ import io.tml.iov.common.util.PropertiesUtil;
 import io.tml.iov.superior.handler.JT809ServerInitialzer;
 
 /**
- * @Author: Xiuming Lee
- * @Date: 2019/9/21 20:26
- * @Version 1.0
- * @Describe: 启动类
+ * 启动类
  */
 public class JT809Server {
     private static Logger log = LoggerFactory.getLogger(JT809Server.class);
@@ -41,7 +38,6 @@ public class JT809Server {
         serverBootstrap.bind(port).addListener(future -> {
             if (future.isSuccess()) {
                 log.info("JT809Server在端口：{}启动成功!",port);
-//                CommonUtils.delDataTimer(); // 定时任务，定时删除垃圾数据
             } else {
                 log.error("JT809Server在端口：{}启动失败!",port);
             }

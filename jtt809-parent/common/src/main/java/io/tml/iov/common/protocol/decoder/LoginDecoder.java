@@ -15,10 +15,7 @@ import io.tml.iov.common.util.PacketDecoderUtils;
 import io.tml.iov.common.util.constant.Const;
 
 /**
- * @Author: Xiuming Lee
- * @Date: 2019/9/21 21:02
- * @Version 1.0
- * @Describe: 登录解码器
+ * 登录解码器
  */
 public class LoginDecoder implements Decoder {
     private static Logger log = LoggerFactory.getLogger(LoginDecoder.class);

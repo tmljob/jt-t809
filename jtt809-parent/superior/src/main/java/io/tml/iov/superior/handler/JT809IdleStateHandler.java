@@ -8,12 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Author: Xiuming Lee
- * @Date: 2019/9/23 16:22
- * @Version 1.0
- * @Describe:
- */
+
 public class JT809IdleStateHandler extends IdleStateHandler {
     private static Logger log = LoggerFactory.getLogger(JT809IdleStateHandler.class);
 

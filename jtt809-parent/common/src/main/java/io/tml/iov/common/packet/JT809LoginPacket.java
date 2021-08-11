@@ -8,7 +8,7 @@ import io.tml.iov.common.util.Jtt809Util;
 import io.tml.iov.common.util.constant.Const;
 
 /**
- * @Describe: 登录请求包，此中的结尾数据体的消息。
+ *  登录请求包，此中的结尾数据体的消息。
  */
 
 public class JT809LoginPacket extends JT809BasePacket {

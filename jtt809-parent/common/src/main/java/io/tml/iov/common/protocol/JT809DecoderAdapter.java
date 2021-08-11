@@ -17,7 +17,7 @@ import io.tml.iov.common.util.CrcUtil;
 import io.tml.iov.common.util.PacketDecoderUtils;
 
 /**
- * @Describe: 解码器
+ *  解码器
  */
 public class JT809DecoderAdapter extends ByteToMessageDecoder {
     private static Logger log = LoggerFactory

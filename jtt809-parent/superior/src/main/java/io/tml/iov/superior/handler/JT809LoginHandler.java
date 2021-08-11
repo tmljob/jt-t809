@@ -10,12 +10,7 @@ import io.tml.iov.common.packet.JT809LoginPacket;
 import io.tml.iov.common.packet.JT809LoginResponsePacket;
 import io.tml.iov.common.util.constant.Const;
 
-/**
- * @Author: Xiuming Lee
- * @Date: 2019/9/22 20:06
- * @Version 1.0
- * @Describe:
- */
+
 public class JT809LoginHandler extends SimpleChannelInboundHandler<JT809LoginPacket> {
     private static Logger log = LoggerFactory.getLogger(JT809LoginHandler.class);
 

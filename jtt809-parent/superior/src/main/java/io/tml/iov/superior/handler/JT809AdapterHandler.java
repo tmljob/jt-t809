@@ -6,10 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @Author: Xiuming Lee
- * @Date: 2019/9/22 21:21
- * @Version 1.0
- * @Describe: 适配处理器
+ * 适配处理器
  */
 public class JT809AdapterHandler extends ChannelInboundHandlerAdapter {
     private static Logger log = LoggerFactory.getLogger(JT809AdapterHandler.class);
