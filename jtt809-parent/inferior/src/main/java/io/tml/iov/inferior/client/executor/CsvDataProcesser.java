@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CsvDataProcesser {
 
-    private static final String INPUT_DIR = "input";
+    private static final String INPUT_DIR = "/input";
     private static final String SUFFIX = "csv";
 
     private static final int CSV_COLUMN_LIMIT = 8;

@@ -13,6 +13,22 @@
     </formats>
 
     <includeBaseDirectory>true</includeBaseDirectory>
+    
+    <!-- 把依赖jar包打包进Zip压缩文件的lib目录下 -->
+    <dependencySets>
+        <dependencySet>
+            <!--不使用项目的artifact，第三方jar不要解压，打包进zip文件的lib目录-->
+            <useProjectArtifact>false</useProjectArtifact>
+
+            <!-- 第三方jar打包进Zip文件的lib目录下， -->
+            <!-- 注意此目录要与maven-jar-plugin中classpathPrefix指定的目录相同, -->
+            <!-- 不然这些依赖的jar包加载到ClassPath的时候会找不到-->
+            <outputDirectory>lib</outputDirectory>
+
+            <!-- 第三方jar不要解压-->
+            <!--<unpack>false</unpack>-->
+        </dependencySet>
+    </dependencySets>
 
     <fileSets>
         <!--
