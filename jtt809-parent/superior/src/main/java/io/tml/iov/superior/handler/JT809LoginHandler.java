@@ -8,6 +8,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.tml.iov.common.config.EncryptConfig;
 import io.tml.iov.common.packet.JT809LoginPacket;
 import io.tml.iov.common.packet.JT809LoginResponsePacket;
+import io.tml.iov.common.util.PropertiesUtil;
 import io.tml.iov.common.util.constant.Const;
 
 
@@ -31,13 +32,17 @@ public class JT809LoginHandler extends SimpleChannelInboundHandler<JT809LoginPac
         int userId =  msg.getUserId();
         String password =  msg.getPassword().trim();
         log.info("接收到了登录的请求->用户名：{};密码：{};",userId,password);
-        if (Const.UserInfo.USER_ID == userId && Const.UserInfo.PASSWORD.equals(password)) {
+        
+        int userIdSettings = PropertiesUtil.getInteger("netty.server.userid");
+        String pwdSetting = PropertiesUtil.getString("netty.server.pwd");
+        
+        if (userIdSettings == userId && pwdSetting.equals(password)) {
             log.info("登录验证成功");
             return Const.LoginResponseCode.SUCCESS;
-        } else if (Const.UserInfo.USER_ID != userId){
-            log.info("USER_ID不正确");
+        } else if (userIdSettings != userId){
+            log.info("USER_ID not exist");
             return Const.LoginResponseCode.USERNAME_ERROR;
-        } else if (!Const.UserInfo.PASSWORD.equals(password.toString())){
+        } else if (!pwdSetting.equals(password)){
             log.info("PASSWORD_ERROR");
             return Const.LoginResponseCode.PASSWORD_ERROR;
         }else {

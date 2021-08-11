@@ -19,13 +19,12 @@ public class JT809Server {
     private static int PORT;
 
     public static void main(String[] args) {
-        PORT = Integer.parseInt(PropertiesUtil.getProperty("port","9090"));
+        PORT = Integer.parseInt(PropertiesUtil.getProperty("port", "9090"));
         NioEventLoopGroup boosGroup = new NioEventLoopGroup();
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
 
         final ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap
-                .group(boosGroup, workerGroup)
+        serverBootstrap.group(boosGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 1024)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
@@ -37,9 +36,9 @@ public class JT809Server {
     private static void bind(final ServerBootstrap serverBootstrap, int port) {
         serverBootstrap.bind(port).addListener(future -> {
             if (future.isSuccess()) {
-                log.info("JT809Server在端口：{}启动成功!",port);
+                log.info("JT809 Server start successfully at port {}!", port);
             } else {
-                log.error("JT809Server在端口：{}启动失败!",port);
+                log.error("JT809 Server fail to start at port {}!", port);
             }
         });
     }

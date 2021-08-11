@@ -57,13 +57,4 @@ public class Const {
         byte NO = 0x00;
     }
 
-    /** 用户信息，以下信息请自定义*/
-    public interface UserInfo{
-        int USER_ID = 1001;
-        String PASSWORD = "hihihi";
-        int MSG_GNSSCENTERID = 1001;
-    }
-
-
-
 }

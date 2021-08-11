@@ -3,6 +3,7 @@ package io.tml.iov.common.packet;
 import io.tml.iov.common.config.EncryptConfig;
 import io.tml.iov.common.util.CommonUtils;
 import io.tml.iov.common.util.Jtt809Util;
+import io.tml.iov.common.util.PropertiesUtil;
 import io.tml.iov.common.util.constant.Const;
 
 /**
@@ -16,7 +17,7 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
         setMsgLength(getFixedByteLength() + FIXED_LENGTH);
         setMsgSn(Const.getMsgSN());
         setMsgId(Const.BusinessDataType.UP_CONNECT_RSP);
-        setMsgGNSSCenterId(Const.UserInfo.MSG_GNSSCENTERID);
+        setMsgGNSSCenterId(PropertiesUtil.getInteger("netty.server.centerId"));
 //        setVersionFlag(new byte[] { 1, 0, 0 });
         // 加密配置
 //        setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
