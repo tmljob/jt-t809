@@ -9,7 +9,7 @@ netty.server.ip=127.0.0.1
 netty.server.port=8000
 netty.server.userid=1001
 netty.server.pwd=hihihihi
-netty.server.centerId: 1001
+netty.server.centerId=1001
 ```
 
 如需要对报文进行加密，可以开启加密开关并配置加密参数(m1、ia1、ic1)，默认不开启加密。
