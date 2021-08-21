@@ -1,6 +1,9 @@
 package io.tml.iov.common.util;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
@@ -20,8 +23,13 @@ public class PropertiesUtil {
         String fileName = "application.properties";
         props = new Properties();
         try {
-            props.load(new InputStreamReader(PropertiesUtil.class
-                    .getClassLoader().getResourceAsStream(fileName), "UTF-8"));
+            File configFile = new File(
+                    System.getProperty("user.dir") + File.separator + fileName);
+            InputStream in = configFile.exists()
+                    ? new FileInputStream(configFile)
+                    : PropertiesUtil.class.getClassLoader()
+                            .getResourceAsStream(fileName);
+            props.load(new InputStreamReader(in, "UTF-8"));
         } catch (IOException e) {
             log.error("配置文件读取异常", e);
         }
@@ -60,10 +68,10 @@ public class PropertiesUtil {
         }
         return Integer.parseInt(value.trim());
     }
-    
-    public static String getProperty(String key,String defaultValue){
+
+    public static String getProperty(String key, String defaultValue) {
         String value = props.getProperty(key.trim());
-        if(value.isEmpty()){
+        if (value.isEmpty()) {
             value = defaultValue;
         }
         return value.trim();
