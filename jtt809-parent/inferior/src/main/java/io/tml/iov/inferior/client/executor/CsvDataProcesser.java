@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CsvDataProcesser {
 
-    private static final String INPUT_DIR = "/input";
+    private static final String INPUT_DIR = "input";
     private static final String SUFFIX = "csv";
 
     private static final int CSV_COLUMN_LIMIT = 8;
@@ -38,22 +38,24 @@ public class CsvDataProcesser {
     private static final int ALTUTIDE_INDEX = 7;
 
     private static final int DATE_INDEX = 8;
-    
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private static JT809Packet0x1202 buildLocation(String[] locArray, boolean plusDate) {
+    private static DateTimeFormatter formatter = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    private static JT809Packet0x1202 buildLocation(String[] locArray,
+            boolean plusDate) {
         JT809Packet0x1202 location = new JT809Packet0x1202();
         location.setDirection(Short.valueOf(locArray[DIRECTION_INDEX].trim()));
-        location.setLon(
-                CommonUtils.formatLonLat(Double.valueOf(locArray[LON_INDEX].trim())));
-        location.setLat(
-                CommonUtils.formatLonLat(Double.valueOf(locArray[LAT_INDEX].trim())));
+        location.setLon(CommonUtils
+                .formatLonLat(Double.valueOf(locArray[LON_INDEX].trim())));
+        location.setLat(CommonUtils
+                .formatLonLat(Double.valueOf(locArray[LAT_INDEX].trim())));
         location.setVec1(Short.valueOf(locArray[VEC1_INDEX].trim()));
         location.setVec2(Short.valueOf(locArray[VEC2_INDEX].trim()));
         location.setVec3(Short.valueOf(locArray[VEC3_INDEX].trim()));
         location.setAltitude(Short.valueOf(locArray[ALTUTIDE_INDEX].trim()));
         location.setVehicleNo(locArray[VEHICLENO_INDEX].trim());
-        if(plusDate) {
+        if (plusDate) {
             String dateStr = locArray[DATE_INDEX].trim();
             LocalDate localDate = LocalDate.parse(dateStr, formatter);
             LocalTime localTime = LocalTime.parse(dateStr, formatter);
@@ -63,9 +65,10 @@ public class CsvDataProcesser {
             location.setDate(LocalDate.now());
             location.setTime(LocalTime.now());
         }
-        
-        location.setEncryptFlag((byte)EncryptConfig.getInstance().getEncryptFlag());
-       
+
+        location.setEncryptFlag(
+                (byte) EncryptConfig.getInstance().getEncryptFlag());
+
         return location;
     }
 
@@ -75,20 +78,17 @@ public class CsvDataProcesser {
         int csvColumn = enableDateColumn == Const.SWITCH_ON
                 ? CSV_COLUMN_PLUS_LIMIT
                 : CSV_COLUMN_LIMIT;
-        boolean plusDate = enableDateColumn == Const.SWITCH_ON
-                ? true
-                : false;
-        String inputPath = PathHelper.getRootPath() + INPUT_DIR;
+        boolean plusDate = enableDateColumn == Const.SWITCH_ON ? true : false;
+        String inputPath = System.getProperty("user.dir") + File.separator
+                + INPUT_DIR;
         log.info("csv path info|{}", inputPath);
-        
+
         DownLinkServer downLinkServer = new DownLinkServer();
         downLinkServer.starDownLinkServer();
 
-        
         DataSender sender = DataSender.getInstance();
         sender.login2Superior();
-        
-       
+
         synchronized (DataSender.class) {
             try {
                 DataSender.class.wait();
@@ -123,8 +123,7 @@ public class CsvDataProcesser {
                         while ((line = br.readLine()) != null) {
                             lineNum++;
                             locArray = line.split(",|\t");
-                            if (lineNum == 1
-                                    || locArray.length < csvColumn) {
+                            if (lineNum == 1 || locArray.length < csvColumn) {
                                 if (locArray.length < csvColumn) {
                                     log.info(
                                             "data parser error,File:{},line num:{}",
@@ -133,8 +132,8 @@ public class CsvDataProcesser {
                                 continue;
                             }
 
-                            JT809Packet0x1202 location = buildLocation(
-                                    locArray, plusDate);
+                            JT809Packet0x1202 location = buildLocation(locArray,
+                                    plusDate);
                             if (!sender.channelAvaliable()) {
                                 try {
                                     Thread.sleep(30 * 1000);
