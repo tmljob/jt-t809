@@ -2,7 +2,6 @@ package io.tml.iov.inferior.client;
 
 import org.apache.commons.lang3.StringUtils;
 
-import io.netty.channel.Channel;
 import io.tml.iov.common.packet.JT809LoginPacket;
 import io.tml.iov.common.packet.JT809Packet0x1202;
 import io.tml.iov.common.util.PropertiesUtil;
@@ -15,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DataSender {
 
     private DataSender() {
+        tcpclient.doConnect();
     }
 
     /**
@@ -37,9 +37,6 @@ public class DataSender {
     private static String DOWN_LINK_IP = "127.0.0.1";
 
     private static TCPClient809 tcpclient = TCPClient809.getInstance();
-    private Channel channel = tcpclient.getChannel(
-            PropertiesUtil.getString("netty.server.ip"),
-            PropertiesUtil.getInteger("netty.server.port"));
     public static int ENCRYPT_FLAG = PropertiesUtil
             .getInteger("message.encrypt.enable");
 
@@ -85,9 +82,10 @@ public class DataSender {
             loginPacket.setUserId(COM_ID);
             loginPacket.setPassword(COM_PWD);
             loginPacket.setDownLinkIp(DOWN_LINK_IP);
-            loginPacket.setDownLinkPort((short) PropertiesUtil.getInteger("downlink.port"));
+            loginPacket.setDownLinkPort(
+                    (short) PropertiesUtil.getInteger("downlink.port"));
             loginPacket.setMsgGNSSCenterId(PLANT_CODE);
-            channel.write(loginPacket);
+            tcpclient.getChannel().write(loginPacket);
             LONGINSTATUS = LOGINING;
         }
         return success;
@@ -104,10 +102,11 @@ public class DataSender {
         if (isLogined()) {
             // 已经登录成功，开始发送数据
             if (channelAvaliable()) {
-                channel.write(awsVo);
+                tcpclient.getChannel().write(awsVo);
                 success = true;
                 log.info("发送--" + awsVo.toString());
             } else {
+                success = false;
                 LONGINSTATUS = "";
             }
         } else if (LOGIN_FLAG == 0) {
@@ -121,7 +120,8 @@ public class DataSender {
     }
 
     public boolean channelAvaliable() {
-        return null != channel && channel.isWritable();
+        return null != tcpclient.getChannel()
+                && tcpclient.getChannel().isWritable();
     }
 
 }

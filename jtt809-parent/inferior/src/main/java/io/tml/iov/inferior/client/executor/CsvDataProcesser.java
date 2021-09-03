@@ -87,7 +87,13 @@ public class CsvDataProcesser {
         downLinkServer.starDownLinkServer();
 
         DataSender sender = DataSender.getInstance();
-        sender.login2Superior();
+        while(true) {
+            if(sender.channelAvaliable()) {
+                sender.login2Superior();
+                break;
+            }
+        }
+      
 
         synchronized (DataSender.class) {
             try {
@@ -112,6 +118,7 @@ public class CsvDataProcesser {
                 log.info("csv processer scan files:{}", csvFiles);
                 int sucessCnt = 0;
                 int failCnt = 0;
+                boolean sendResult = true;
                 for (String path : csvFiles) {
                     try (BufferedReader br = new BufferedReader(
                             new InputStreamReader(new FileInputStream(path),
@@ -134,8 +141,10 @@ public class CsvDataProcesser {
 
                             JT809Packet0x1202 location = buildLocation(locArray,
                                     plusDate);
-                            if (!sender.channelAvaliable()) {
+                            
+                            while(!sender.channelAvaliable()) {
                                 try {
+                                    log.info("channel is not avaliable,wait 30s");
                                     Thread.sleep(30 * 1000);
                                 } catch (InterruptedException e) {
                                     log.error(
@@ -144,9 +153,9 @@ public class CsvDataProcesser {
                                 }
                             }
 
-                            boolean result = sender.sendMsg2Gov(location);
+                            sendResult &= sender.sendMsg2Gov(location);
 
-                            if (result) {
+                            if (sendResult) {
                                 sucessCnt++;
                             } else {
                                 failCnt++;
@@ -161,10 +170,11 @@ public class CsvDataProcesser {
                 log.info("data send success cnt:{}", sucessCnt);
                 log.info("data send fail cnt:{}", failCnt);
 
-                csvFiles.forEach(path -> {
-                    File file = new File(path);
-                    file.delete();
-                });
+                    csvFiles.forEach(path -> {
+                        File file = new File(path);
+                        file.delete();
+                    });  
+              
             }
         }).start();
     }

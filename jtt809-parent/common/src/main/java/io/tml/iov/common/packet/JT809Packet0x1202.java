@@ -215,7 +215,7 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             // 经度，纬度
             buffer.writeInt(getLon());// 4
 //            buffer.writeInt(39563620);// 4
-            buffer.writeBytes(CommonUtils.int2bytes(39563620));
+            buffer.writeBytes(CommonUtils.int2bytes(getLat()));
             // 速度
             buffer.writeShort(getVec1());// 2
             // 行驶记录速度

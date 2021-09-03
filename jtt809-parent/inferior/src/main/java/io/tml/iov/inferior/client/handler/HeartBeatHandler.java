@@ -8,6 +8,7 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.tml.iov.common.packet.JT809Heartbeat;
 import io.tml.iov.inferior.client.DataSender;
+import io.tml.iov.inferior.client.TCPClient809;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -15,6 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HeartBeatHandler extends ChannelInboundHandlerAdapter {
 
+    private TCPClient809 client;
+    
+    public HeartBeatHandler(TCPClient809 client809) {
+        this.client = client809;
+        
+    }
+    
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt)
             throws Exception {
@@ -36,5 +44,12 @@ public class HeartBeatHandler extends ChannelInboundHandlerAdapter {
         }
 
     }
+    
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        client.doConnect();
+    }
+
 
 }
