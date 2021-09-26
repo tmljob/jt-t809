@@ -9,7 +9,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import io.tml.iov.common.config.EncryptConfig;
 import io.tml.iov.common.packet.JT809Packet0x1202;
 import io.tml.iov.common.util.CommonUtils;
 import io.tml.iov.common.util.PropertiesUtil;
@@ -65,9 +64,6 @@ public class CsvDataProcesser {
             location.setDate(LocalDate.now());
             location.setTime(LocalTime.now());
         }
-
-        location.setEncryptFlag(
-                (byte) EncryptConfig.getInstance().getEncryptFlag());
 
         return location;
     }

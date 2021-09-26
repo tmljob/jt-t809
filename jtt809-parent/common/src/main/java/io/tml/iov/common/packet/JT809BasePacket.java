@@ -10,6 +10,8 @@ import io.tml.iov.common.util.CrcUtil;
  */
 
 public abstract class JT809BasePacket {
+    
+    public static final  int ENCRYPTKEY_LEN = 6;
     /**
      *  不算消息体固定为26个字节长度
      *  Head flag + Message Header + CRC Code + End Flag

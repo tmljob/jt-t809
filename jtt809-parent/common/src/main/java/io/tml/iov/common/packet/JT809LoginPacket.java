@@ -6,10 +6,11 @@ import io.tml.iov.common.config.EncryptConfig;
 import io.tml.iov.common.util.CommonUtils;
 import io.tml.iov.common.util.Jtt809Util;
 import io.tml.iov.common.util.PropertiesUtil;
+import io.tml.iov.common.util.RandomUtils;
 import io.tml.iov.common.util.constant.Const;
 
 /**
- *  登录请求包，此中的结尾数据体的消息。
+ * 登录请求包，此中的结尾数据体的消息。
  */
 
 public class JT809LoginPacket extends JT809BasePacket {
@@ -23,10 +24,10 @@ public class JT809LoginPacket extends JT809BasePacket {
         setMsgGNSSCenterId(PropertiesUtil.getInteger("netty.server.centerId"));
 //        setVersionFlag(new byte[] { 1, 0, 0 });
         // 加密配置
-//        setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
-//        setEncryptKey(0);
+        setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
+        setEncryptKey(RandomUtils.genNumByLen(ENCRYPTKEY_LEN));
     }
-
+    
     /** id 4字节 */
     private int userId;
     /** 密码 8字节 */

@@ -10,6 +10,7 @@ import io.tml.iov.common.config.EncryptConfig;
 import io.tml.iov.common.util.CommonUtils;
 import io.tml.iov.common.util.Jtt809Util;
 import io.tml.iov.common.util.PropertiesUtil;
+import io.tml.iov.common.util.RandomUtils;
 import io.tml.iov.common.util.constant.Const;
 
 /**
@@ -26,8 +27,8 @@ public class JT809Packet0x1202 extends JT809BasePacket {
         setMsgGNSSCenterId(PropertiesUtil.getInteger("netty.server.centerId"));
 //        setVersionFlag(new byte[] { 1, 0, 0 });
         // 加密配置
-//        setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
-//        setEncryptKey(0);
+        setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
+        setEncryptKey(RandomUtils.genNumByLen(ENCRYPTKEY_LEN));
     }
 
     /** 车牌号 21字节 */
