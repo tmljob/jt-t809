@@ -3,7 +3,9 @@ package io.tml.iov.common.util;
 import static io.tml.iov.common.util.CommonUtils.PACKET_CACHE;
 
 import io.netty.buffer.ByteBuf;
+import io.tml.iov.common.config.ProtocalVersionConfig;
 import io.tml.iov.common.packet.JT809BasePacket;
+import io.tml.iov.common.util.constant.Const;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -129,6 +131,12 @@ public class PacketDecoderUtils {
         packet.setVersionFlag(versionFlag);
         packet.setEncryptFlag(byteBuf.readByte());
         packet.setEncryptKey(byteBuf.readInt());
+        
+        if (ProtocalVersionConfig.getInstance().getVersion()
+                .equalsIgnoreCase(Const.ProtocalVersion.VERSION_2019)) {
+            byteBuf.skipBytes(8);
+        }
+        
         return byteBuf;
     }
 
