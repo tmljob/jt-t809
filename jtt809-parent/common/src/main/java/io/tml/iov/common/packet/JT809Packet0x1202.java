@@ -28,7 +28,8 @@ public class JT809Packet0x1202 extends JT809BasePacket {
     public JT809Packet0x1202() {
         if (ProtocalVersionConfig.getInstance().getVersion()
                 .equalsIgnoreCase(Const.ProtocalVersion.VERSION_2019)) {
-            setMsgLength(getFixedByteLength() + FIXED_LENGTH_2019);
+            //6位是附加里程信息
+            setMsgLength(getFixedByteLength() + FIXED_LENGTH_2019 + 6);
         } else {
             setMsgLength(getFixedByteLength() + FIXED_LENGTH_2011);
         }
@@ -39,7 +40,7 @@ public class JT809Packet0x1202 extends JT809BasePacket {
 //        setVersionFlag(new byte[] { 1, 0, 0 });
         // 加密配置
         setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
-        setEncryptKey(RandomUtils.genNumByLen(ENCRYPTKEY_LEN));
+        setEncryptKey(RandomUtils.genNumByLen(Const.Encrypt.ENCRYPTKEY_LEN));
     }
 
     /** 车牌号 21字节 */
@@ -293,7 +294,7 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             // 是否加密
             buffer.writeByte((byte) 0);// 0未加密 // 1
             // 车辆定位信息数据长度
-            buffer.writeInt(28);
+            buffer.writeInt(28+6);
             buffer.writeInt(0);
             buffer.writeInt(0);
             // 纬度,经度
@@ -314,6 +315,11 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             String timeString = date.format(formatter1)
                     + time.format(formatter2);
             buffer.writeBytes(PacketDecoderUtils.hexStr2Bytes(timeString));
+            
+            //附加里程信息
+            buffer.writeByte(Const.LocAttachInfo.MILE);
+            buffer.writeByte((byte) 4);
+            buffer.writeInt(getVec3());
 
             // (11+4)*3
             for (int index = 0; index < (11 + 4) * 3; index++) {

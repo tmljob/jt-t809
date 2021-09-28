@@ -38,7 +38,7 @@ public class JT809Packet0x1202Decoder implements Decoder {
     private void packetDecoder(ByteBuf byteBuf, JT809Packet0x1202 packet)
             throws Exception {
         ByteBuf msgBodyBuf = null;
-        if (packet.getEncryptFlag() == Const.EncryptFlag.NO) {
+        if (packet.getEncryptFlag() == Const.Encrypt.NO) {
             msgBodyBuf = PacketDecoderUtils.getMsgBodyBuf(byteBuf);
         } else {
             log.info("packet is encry, continue to process.");
@@ -79,7 +79,7 @@ public class JT809Packet0x1202Decoder implements Decoder {
         packet.setDataLength(msgBodyBuf.readInt());
         // 经纬度信息是否按国标进行加密
         packet.setExcrypt(msgBodyBuf.readByte());
-        if (packet.getExcrypt() == Const.EncryptFlag.YES) {
+        if (packet.getExcrypt() == Const.Encrypt.YES) {
             log.error("lon/lat info is encry, packet is {}",
                     PACKET_CACHE.get(Thread.currentThread().getName()));
         }
@@ -129,7 +129,7 @@ public class JT809Packet0x1202Decoder implements Decoder {
         packet.setDataLength(msgBodyBuf.readInt());
         // 经纬度信息是否按国标进行加密
         packet.setExcrypt(msgBodyBuf.readByte());
-        if (packet.getExcrypt() == Const.EncryptFlag.YES) {
+        if (packet.getExcrypt() == Const.Encrypt.YES) {
             log.error("lon/lat info is encry, packet is {}",
                     PACKET_CACHE.get(Thread.currentThread().getName()));
         }
@@ -155,9 +155,23 @@ public class JT809Packet0x1202Decoder implements Decoder {
         LocalDateTime localDateTime = LocalDateTime.parse(bcdTimeStr, df);
         packet.setDate(localDateTime.toLocalDate());
         packet.setTime(localDateTime.toLocalTime());
+     
+       // 位置附加信息解析
+        int locAttachLen = locLen - 28;
+        while(locAttachLen > 0 ) {
+            byte attchId = msgBodyBuf.readByte();
+            byte attchLen = msgBodyBuf.readByte();
+            ByteBuf attchInfo = msgBodyBuf.readBytes(attchLen);
+            
+            if(Const.LocAttachInfo.MILE == attchId) {
+                packet.setVec3(attchInfo.readInt());
+            }
+            
+            locAttachLen = locAttachLen -1 -1 - attchLen;
+        }
+        
         //(11+4)*5
         msgBodyBuf.skipBytes(45);
-       //TODO: 位置附加信息解析
     }
 
 }

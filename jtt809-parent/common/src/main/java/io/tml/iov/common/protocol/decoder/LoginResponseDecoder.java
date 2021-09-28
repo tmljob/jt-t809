@@ -23,7 +23,7 @@ public class LoginResponseDecoder implements Decoder {
     
     private void loginResponsePacketDecoder(ByteBuf byteBuf,JT809LoginResponsePacket loginResponsePacket) throws Exception{
         ByteBuf msgBodyBuf = null;
-        if (loginResponsePacket.getEncryptFlag() == Const.EncryptFlag.NO) {
+        if (loginResponsePacket.getEncryptFlag() == Const.Encrypt.NO) {
             log.info("packet no encry, contine to process.");
             msgBodyBuf = PacketDecoderUtils.getMsgBodyBuf(byteBuf);
         } else {

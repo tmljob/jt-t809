@@ -22,7 +22,7 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
 //        setVersionFlag(new byte[] { 1, 0, 0 });
         // 加密配置
         setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
-        setEncryptKey(RandomUtils.genNumByLen(ENCRYPTKEY_LEN));
+        setEncryptKey(RandomUtils.genNumByLen(Const.Encrypt.ENCRYPTKEY_LEN));
     }
 
     /** 标志 1位 */

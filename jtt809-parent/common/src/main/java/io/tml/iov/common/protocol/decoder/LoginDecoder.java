@@ -35,7 +35,7 @@ public class LoginDecoder implements Decoder {
      */
     private void loginPacketDecoder(ByteBuf byteBuf,JT809LoginPacket loginPacket) throws Exception{
         ByteBuf msgBodyBuf = null;
-        if (loginPacket.getEncryptFlag() == Const.EncryptFlag.NO) {
+        if (loginPacket.getEncryptFlag() == Const.Encrypt.NO) {
             log.info("packet no encry, contine to process.");
             msgBodyBuf = PacketDecoderUtils.getMsgBodyBuf(byteBuf);
         } else {

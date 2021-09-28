@@ -21,6 +21,7 @@ public class TaskExecutor {
         location.setVehicleNo("皖A66M27");
         location.setDate(LocalDate.now());
         location.setTime(LocalTime.now());
+        location.setVec3(88);
         
         s.sendMsg2Gov(location);
         while (true) {

@@ -15,7 +15,7 @@ public class JT809HeartbeatResponse extends JT809BasePacket {
         setMsgId(Const.BusinessDataType.UP_LINKTEST_RSP);
         setMsgGNSSCenterId(PropertiesUtil.getInteger("netty.server.centerId"));
         setVersionFlag(new byte[]{1,0,0});
-        setEncryptFlag(Const.EncryptFlag.NO);
+        setEncryptFlag(Const.Encrypt.NO);
         setEncryptKey(0);
     }
 

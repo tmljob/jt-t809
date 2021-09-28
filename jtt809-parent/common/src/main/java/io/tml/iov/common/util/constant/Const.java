@@ -53,16 +53,25 @@ public class Const {
     }
 
     /** 报文数据体是否加密 */
-    public interface EncryptFlag {
+    public interface Encrypt {
         /** 加密 */
         byte YES = 0x01;
         /** 不加密 */
         byte NO = 0x00;
+        
+        int ENCRYPTKEY_LEN = 6;
     }
 
+    /** 协议版本 **/
     public interface ProtocalVersion {
         String VERSION_2011 = "2011";
         String VERSION_2019 = "2019";
+    }
+    
+    /** 位置附件信息ID **/
+    public interface LocAttachInfo {
+        /** 里程  **/
+        byte MILE = 0x01;
     }
 
 }
