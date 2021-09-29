@@ -43,6 +43,8 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
+    
+    <logger name="org.apache.kafka.clients.producer.ProducerConfig" level="off" />
 
     <root level="INFO">
         <appender-ref ref="console"/>
