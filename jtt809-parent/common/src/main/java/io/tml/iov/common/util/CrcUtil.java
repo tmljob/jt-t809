@@ -22,7 +22,7 @@ public class CrcUtil {
         log.info("bytebuf is {}",ByteBufUtil.hexDump(byteBuf));
         byte[] crcBody = new byte[crcLength];
         byteBuf.readBytes(crcBody);
-        log.info("bytebuf is {}",ByteBufUtil.hexDump(byteBuf));
+        log.info("bytebuf execude crcbody is {}",ByteBufUtil.hexDump(byteBuf));
 
         short oldCRCcode = byteBuf.readShort();
         short currentCRCcode = (short) getCRC16(crcBody);

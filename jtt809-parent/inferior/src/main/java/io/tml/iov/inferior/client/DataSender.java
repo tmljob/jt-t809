@@ -104,7 +104,7 @@ public class DataSender {
             if (channelAvaliable()) {
                 tcpclient.getChannel().write(awsVo);
                 success = true;
-                log.info("发送--" + awsVo.toString());
+                log.info("send -->" + awsVo.toString());
             } else {
                 success = false;
                 LONGINSTATUS = "";

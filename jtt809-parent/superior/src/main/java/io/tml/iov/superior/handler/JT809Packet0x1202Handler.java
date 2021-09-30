@@ -23,7 +23,7 @@ public class JT809Packet0x1202Handler
     @Override
     protected void channelRead0(ChannelHandlerContext ctx,
             JT809Packet0x1202 msg) {
-        log.info("车辆定位信息：{}", msg.toString());
+        log.info("vehicle locatin msg ：{}", msg);
         if (KafkaProducerConfig.getInstance().isEnable()) {
             // 1.创建一个生产者对象
             Producer<String, String> producer = new KafkaProducer<>(
@@ -38,9 +38,9 @@ public class JT809Packet0x1202Handler
                                         LocationMsg.convert(msg))),
                         (metadata, exception) -> {
                             if (exception == null) {
-                                log.info("消息发送成功->{}", metadata.offset());
+                                log.info("location msg success to send ->{}", metadata.offset());
                             } else {
-                                log.error("消息发送失败->{}", exception.getMessage(),
+                                log.error("location msg fail to send ->{}", exception.getMessage(),
                                         exception);
                             }
                         });
