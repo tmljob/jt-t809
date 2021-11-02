@@ -3,7 +3,10 @@ package io.tml.iov.inferior.client.executor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -37,22 +40,24 @@ public class CsvDataProcesser {
     private static final int ALTUTIDE_INDEX = 7;
 
     private static final int DATE_INDEX = 8;
-    
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private static JT809Packet0x1202 buildLocation(String[] locArray, boolean plusDate) {
+    private static DateTimeFormatter formatter = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    private static JT809Packet0x1202 buildLocation(String[] locArray,
+            boolean plusDate) {
         JT809Packet0x1202 location = new JT809Packet0x1202();
         location.setDirection(Short.valueOf(locArray[DIRECTION_INDEX].trim()));
-        location.setLon(
-                CommonUtils.formatLonLat(Double.valueOf(locArray[LON_INDEX].trim())));
-        location.setLat(
-                CommonUtils.formatLonLat(Double.valueOf(locArray[LAT_INDEX].trim())));
+        location.setLon(CommonUtils
+                .formatLonLat(Double.valueOf(locArray[LON_INDEX].trim())));
+        location.setLat(CommonUtils
+                .formatLonLat(Double.valueOf(locArray[LAT_INDEX].trim())));
         location.setVec1(Short.valueOf(locArray[VEC1_INDEX].trim()));
         location.setVec2(Short.valueOf(locArray[VEC2_INDEX].trim()));
         location.setVec3(Short.valueOf(locArray[VEC3_INDEX].trim()));
         location.setAltitude(Short.valueOf(locArray[ALTUTIDE_INDEX].trim()));
         location.setVehicleNo(locArray[VEHICLENO_INDEX].trim());
-        if(plusDate) {
+        if (plusDate) {
             String dateStr = locArray[DATE_INDEX].trim();
             LocalDate localDate = LocalDate.parse(dateStr, formatter);
             LocalTime localTime = LocalTime.parse(dateStr, formatter);
@@ -62,109 +67,144 @@ public class CsvDataProcesser {
             location.setDate(LocalDate.now());
             location.setTime(LocalTime.now());
         }
-       
+
         return location;
     }
 
     public static void main(String[] args) {
         int enableDateColumn = PropertiesUtil
                 .getInteger("mock.input.data.date");
-        int csvColumn = enableDateColumn == Const.SWITCH_ON
-                ? CSV_COLUMN_PLUS_LIMIT
-                : CSV_COLUMN_LIMIT;
-        boolean plusDate = enableDateColumn == Const.SWITCH_ON
-                ? true
-                : false;
-        String inputPath = PathHelper.getRootPath() + INPUT_DIR;
+        int csvColumn = getCsvColumn(enableDateColumn);
+        boolean plusDate = enableDateColumn == Const.SWITCH_ON;
+        String inputPath = System.getProperty("user.dir") + File.separator
+                + INPUT_DIR;
         log.info("csv path info|{}", inputPath);
-        
+
         DownLinkServer downLinkServer = new DownLinkServer();
         downLinkServer.starDownLinkServer();
 
-        
         DataSender sender = DataSender.getInstance();
-        sender.login2Superior();
-        
-       
+        waitForChannelSetUp(sender);
+
         synchronized (DataSender.class) {
-            try {
-                DataSender.class.wait();
-            } catch (Exception e) {
-                log.error("wait to login error.", e);
+            boolean waitLogin = true;
+            while (waitLogin) {
+                try {
+                    DataSender.class.wait();
+                } catch (Exception e) {
+                    log.error("wait to login error.", e);
+                }
+                waitLogin = false;
             }
         }
 
-        new Thread(() -> {
-            while (true) {
-                List<String> csvFiles = PathHelper.getFiles(inputPath, SUFFIX);
-                if (csvFiles.isEmpty()) {
-                    try {
-                        Thread.sleep(60 * 1000);
-                    } catch (InterruptedException e) {
-                        log.error("CsvDataProcesser run error", e);
-                    }
-                    continue;
-                }
+        execute(csvColumn, plusDate, inputPath, sender);
+    }
 
-                log.info("csv processer scan files:{}", csvFiles);
-                int sucessCnt = 0;
-                int failCnt = 0;
-                for (String path : csvFiles) {
-                    try (BufferedReader br = new BufferedReader(
-                            new InputStreamReader(new FileInputStream(path),
-                                    "GBK"));) {
-                        log.info("start process file:{}", path);
-                        String line = null;
-                        String[] locArray = null;
-                        int lineNum = 0;
-                        while ((line = br.readLine()) != null) {
-                            lineNum++;
-                            locArray = line.split(",|\t");
-                            if (lineNum == 1
-                                    || locArray.length < csvColumn) {
-                                if (locArray.length < csvColumn) {
-                                    log.info(
-                                            "data parser error,File:{},line num:{}",
-                                            path, lineNum);
-                                }
-                                continue;
-                            }
+    private static void execute(int csvColumn, boolean plusDate,
+            String inputPath, DataSender sender) {
+        while (true) {
+            List<String> csvFiles = PathHelper.getFiles(inputPath, SUFFIX);
+            if (csvFiles.isEmpty()) {
+                threadSleep();
+                continue;
+            }
 
-                            JT809Packet0x1202 location = buildLocation(
-                                    locArray, plusDate);
-                            if (!sender.channelAvaliable()) {
-                                try {
-                                    Thread.sleep(30 * 1000);
-                                } catch (InterruptedException e) {
-                                    log.error(
-                                            "CsvDataProcesser channelAvaliable error",
-                                            e);
-                                }
-                            }
-
-                            boolean result = sender.sendMsg2Gov(location);
-
-                            if (result) {
-                                sucessCnt++;
-                            } else {
-                                failCnt++;
-                            }
+            log.info("csv processer scan files:{}", csvFiles);
+            StatCount statCount = new StatCount();
+            boolean sendResult = true;
+            for (String path : csvFiles) {
+                try (BufferedReader br = new BufferedReader(
+                        new InputStreamReader(new FileInputStream(path),
+                                "GBK"));) {
+                    log.info("start process file:{}", path);
+                    String line = null;
+                    String[] locArray = null;
+                    int lineNum = 0;
+                    while ((line = br.readLine()) != null) {
+                        lineNum++;
+                        locArray = line.split(",|\t");
+                        if (isSkipLine(csvColumn, locArray, lineNum)) {
+                            logParseFile(csvColumn, path, locArray, lineNum);
+                            continue;
                         }
 
-                    } catch (Exception e2) {
-                        log.error("CsvDataProcesser open file error", e2);
+                        JT809Packet0x1202 location = buildLocation(locArray,
+                                plusDate);
+                        checkChannelAvaliable(sender);
+                        sendResult &= sender.sendMsg2Gov(location);
+
+                        statCount.judeResult(sendResult);
                     }
+
+                } catch (Exception e2) {
+                    log.error("CsvDataProcesser open file error", e2);
                 }
-
-                log.info("data send success cnt:{}", sucessCnt);
-                log.info("data send fail cnt:{}", failCnt);
-
-                csvFiles.forEach(path -> {
-                    File file = new File(path);
-                    file.delete();
-                });
             }
-        }).start();
+
+            log.info("data send success cnt:{}", statCount.getSucessCnt());
+            log.info("data send fail cnt:{}", statCount.getFailCnt());
+
+            cleanDoneFile(csvFiles);
+
+        }
+    }
+
+    private static void threadSleep() {
+        try {
+            Thread.sleep(60 * 1000L);
+        } catch (InterruptedException e) {
+            log.error("CsvDataProcesser run error", e);
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private static boolean isSkipLine(int csvColumn, String[] locArray,
+            int lineNum) {
+        return lineNum == 1 || locArray.length < csvColumn;
+    }
+
+    private static void logParseFile(int csvColumn, String path,
+            String[] locArray, int lineNum) {
+        if (locArray.length < csvColumn) {
+            log.info("data parser error,File:{},line num:{}", path, lineNum);
+        }
+    }
+
+    private static void checkChannelAvaliable(DataSender sender) {
+        while (!sender.channelAvaliable()) {
+            try {
+                log.info("channel is not avaliable,wait 30s");
+                Thread.sleep(30 * 1000L);
+            } catch (InterruptedException e) {
+                log.error("CsvDataProcesser channelAvaliable error", e);
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private static void cleanDoneFile(List<String> csvFiles) {
+        csvFiles.forEach(path -> {
+            try {
+                Files.delete(Paths.get(path));
+            } catch (IOException e) {
+                log.error("cleanDoneFile {} error", path);
+            }
+        });
+    }
+
+    private static void waitForChannelSetUp(DataSender sender) {
+        while (true) {
+            if (sender.channelAvaliable()) {
+                sender.login2Superior();
+                break;
+            }
+        }
+    }
+
+    private static int getCsvColumn(int enableDateColumn) {
+        return enableDateColumn == Const.SWITCH_ON ? CSV_COLUMN_PLUS_LIMIT
+                : CSV_COLUMN_LIMIT;
     }
 
 }

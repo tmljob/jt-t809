@@ -3,6 +3,8 @@ package io.tml.iov.common.packet;
 import io.tml.iov.common.config.EncryptConfig;
 import io.tml.iov.common.util.CommonUtils;
 import io.tml.iov.common.util.Jtt809Util;
+import io.tml.iov.common.util.PropertiesUtil;
+import io.tml.iov.common.util.RandomUtils;
 import io.tml.iov.common.util.constant.Const;
 
 /**
@@ -16,24 +18,23 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
         setMsgLength(getFixedByteLength() + FIXED_LENGTH);
         setMsgSn(Const.getMsgSN());
         setMsgId(Const.BusinessDataType.UP_CONNECT_RSP);
-        setMsgGNSSCenterId(Const.UserInfo.MSG_GNSSCENTERID);
-        setVersionFlag(new byte[] { 1, 0, 0 });
+        setMsgGNSSCenterId(PropertiesUtil.getInteger("netty.server.centerId"));
         // 加密配置
         setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
-        setEncryptKey(0);
+        setEncryptKey(RandomUtils.genNumByLen(Const.Encrypt.ENCRYPTKEY_LEN));
     }
 
     /** 标志 1位 */
-    private byte resul;
+    private byte result;
     /** 校验码 4字节 */
     private int verifyCode;
 
-    public byte getResul() {
-        return resul;
+    public byte getResult() {
+        return result;
     }
 
-    public void setResul(byte resul) {
-        this.resul = resul;
+    public void setResult(byte resul) {
+        this.result = resul;
     }
 
     public int getVerifyCode() {
@@ -47,9 +48,9 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
     @Override
     public byte[] getMsgBodyByteArr() {
         byte[] verifyCodeBytes = CommonUtils.int2bytes(this.verifyCode);
-        byte[] msgBody = CommonUtils.append(new byte[] { this.resul },
+        byte[] msgBody = CommonUtils.append(new byte[] { this.result },
                 verifyCodeBytes);
-        if (EncryptConfig.getInstance().getEncryptFlag() == Const.SWITCH_ON) {
+        if (this.getEncryptFlag() == Const.SWITCH_ON) {
             msgBody = Jtt809Util.encrypt(EncryptConfig.getInstance().getM1(),
                     EncryptConfig.getInstance().getIa1(),
                     EncryptConfig.getInstance().getIc1(), getEncryptKey(),
@@ -61,7 +62,7 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
 
     @Override
     public String toString() {
-        return "JT809LoginResponsePacket{" + "resul=" + resul + ", verifyCode="
+        return "JT809LoginResponsePacket{" + "resul=" + result + ", verifyCode="
                 + verifyCode + super.toString() + '}';
     }
 }

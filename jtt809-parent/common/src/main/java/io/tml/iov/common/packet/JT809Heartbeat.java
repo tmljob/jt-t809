@@ -1,5 +1,6 @@
 package io.tml.iov.common.packet;
 
+import io.tml.iov.common.util.PropertiesUtil;
 import io.tml.iov.common.util.constant.Const;
 
 /**
@@ -12,9 +13,9 @@ public class JT809Heartbeat extends JT809BasePacket {
         setMsgLength(getFixedByteLength());
         setMsgSn(Const.getMsgSN());
         setMsgId(Const.BusinessDataType.UP_LINKTEST_REQ);
-        setMsgGNSSCenterId(Const.UserInfo.MSG_GNSSCENTERID);
+        setMsgGNSSCenterId(PropertiesUtil.getInteger("netty.server.centerId"));
         setVersionFlag(new byte[]{1,0,0});
-        setEncryptFlag(Const.EncryptFlag.NO);
+        setEncryptFlag(Const.Encrypt.NO);
         setEncryptKey(0);
     }
 

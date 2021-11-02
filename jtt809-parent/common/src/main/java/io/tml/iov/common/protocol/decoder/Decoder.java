@@ -9,5 +9,5 @@ public interface Decoder {
      * @param bytes
      * @return
      */
-    JT809BasePacket decoder(byte[] bytes) throws Exception;
+    JT809BasePacket decoder(byte[] bytes);
 }

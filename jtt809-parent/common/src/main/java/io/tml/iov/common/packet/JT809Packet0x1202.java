@@ -3,12 +3,17 @@ package io.tml.iov.common.packet;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.tml.iov.common.config.EncryptConfig;
+import io.tml.iov.common.config.ProtocalVersionConfig;
 import io.tml.iov.common.util.CommonUtils;
 import io.tml.iov.common.util.Jtt809Util;
+import io.tml.iov.common.util.PacketDecoderUtils;
+import io.tml.iov.common.util.PropertiesUtil;
+import io.tml.iov.common.util.RandomUtils;
 import io.tml.iov.common.util.constant.Const;
 
 /**
@@ -16,17 +21,25 @@ import io.tml.iov.common.util.constant.Const;
  */
 public class JT809Packet0x1202 extends JT809BasePacket {
 
-    private static final int FIXED_LENGTH = 64;
+    private static final int FIXED_LENGTH_2011 = 64;
+    //不包含位置附件信息
+    private static final int FIXED_LENGTH_2019 = 106;
 
     public JT809Packet0x1202() {
-        setMsgLength(getFixedByteLength() + FIXED_LENGTH);
+        if (ProtocalVersionConfig.getInstance().getVersion()
+                .equalsIgnoreCase(Const.ProtocalVersion.VERSION_2019)) {
+            //6位是附加里程信息
+            setMsgLength(getFixedByteLength() + FIXED_LENGTH_2019 + 6);
+        } else {
+            setMsgLength(getFixedByteLength() + FIXED_LENGTH_2011);
+        }
+      
         setMsgSn(Const.getMsgSN());
         setMsgId(Const.BusinessDataType.UP_EXG_MSG);
-        setMsgGNSSCenterId(Const.UserInfo.MSG_GNSSCENTERID);
-        setVersionFlag(new byte[] { 1, 0, 0 });
+        setMsgGNSSCenterId(PropertiesUtil.getInteger("netty.server.centerId"));
         // 加密配置
         setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
-        setEncryptKey(0);
+        setEncryptKey(RandomUtils.genNumByLen(Const.Encrypt.ENCRYPTKEY_LEN));
     }
 
     /** 车牌号 21字节 */
@@ -192,6 +205,16 @@ public class JT809Packet0x1202 extends JT809BasePacket {
 
     @Override
     public byte[] getMsgBodyByteArr() {
+
+        if (ProtocalVersionConfig.getInstance().getVersion()
+                .equalsIgnoreCase(Const.ProtocalVersion.VERSION_2019)) {
+            return getMsgBodyByteArr2019();
+        }
+
+        return getMsgBodyByteArr2011();
+    }
+
+    private byte[] getMsgBodyByteArr2011() {
         ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer(64);
         try {
             buffer.writeBytes(CommonUtils.getBytesWithLengthAfter(21,
@@ -200,12 +223,13 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             buffer.writeShort(
                     Const.SubBusinessDataType.UP_EXG_MSG_REAL_LOCATION);// 2
             buffer.writeInt(36);// 4
+            
             // 是否加密
             buffer.writeByte((byte) 0);// 0未加密 // 1
             // 日月年dmyy
             buffer.writeByte(date.getDayOfMonth());
             buffer.writeByte(date.getMonthValue());
-            String hexYear = "0" +Integer.toHexString(date.getYear());
+            String hexYear = "0" + Integer.toHexString(date.getYear());
             buffer.writeBytes(CommonUtils.hexStringToByte(hexYear));// 4
             // 时分秒
             buffer.writeByte(time.getHour());
@@ -214,7 +238,7 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             // 经度，纬度
             buffer.writeInt(getLon());// 4
 //            buffer.writeInt(39563620);// 4
-            buffer.writeBytes(CommonUtils.int2bytes(39563620));
+            buffer.writeBytes(CommonUtils.int2bytes(getLat()));
             // 速度
             buffer.writeShort(getVec1());// 2
             // 行驶记录速度
@@ -226,8 +250,8 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             // 海拔
             buffer.writeShort(getAltitude());// 2
             // 车辆状态
-            int accStatus = 0;
-            int gpsStatus = 0;
+            int accStatus = RandomUtils.genNumIncludeMinAndMax(0, 1);
+            int gpsStatus = RandomUtils.genNumIncludeMinAndMax(0, 1);
             if (accStatus == 0 && gpsStatus == 0) {
                 buffer.writeInt(0);// 4
             } else if (accStatus == 1 && gpsStatus == 0) {
@@ -243,8 +267,68 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             byte[] msgBody = new byte[buffer.readableBytes()];
             buffer.readBytes(msgBody);
 
-            if (EncryptConfig.getInstance()
-                    .getEncryptFlag() == Const.SWITCH_ON) {
+            if (this.getEncryptFlag() == Const.SWITCH_ON) {
+                msgBody = Jtt809Util.encrypt(
+                        EncryptConfig.getInstance().getM1(),
+                        EncryptConfig.getInstance().getIa1(),
+                        EncryptConfig.getInstance().getIc1(), getEncryptKey(),
+                        msgBody);
+            }
+
+            return msgBody;
+        } finally {
+            buffer.release();
+        }
+    }
+
+    private byte[] getMsgBodyByteArr2019() {
+        ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer(64);
+        try {
+            buffer.writeBytes(CommonUtils.getBytesWithLengthAfter(21,
+                    vehicleNo.getBytes(Charset.forName("GBK"))));// 21
+            buffer.writeByte(1);// 1
+            buffer.writeShort(
+                    Const.SubBusinessDataType.UP_EXG_MSG_REAL_LOCATION);// 2
+            buffer.writeInt(78);// 4
+            // 是否加密
+            buffer.writeByte((byte) 0);// 0未加密 // 1
+            // 车辆定位信息数据长度
+            buffer.writeInt(28+6);
+            buffer.writeInt(0);
+            buffer.writeInt(0);
+            // 纬度,经度
+            buffer.writeBytes(CommonUtils.int2bytes(getLat()));
+            buffer.writeInt(getLon());// 4
+            // 海拔
+            buffer.writeShort(getAltitude());// 2
+            // 速度
+            buffer.writeShort(getVec1());// 2
+            // 方向
+            buffer.writeShort(getDirection());// 2
+
+            // yyMMddHHmmss
+            DateTimeFormatter formatter1 = DateTimeFormatter
+                    .ofPattern("yyMMdd");
+            DateTimeFormatter formatter2 = DateTimeFormatter
+                    .ofPattern("HHmmss");
+            String timeString = date.format(formatter1)
+                    + time.format(formatter2);
+            buffer.writeBytes(PacketDecoderUtils.hexStr2Bytes(timeString));
+            
+            //附加里程信息
+            buffer.writeByte(Const.LocAttachInfo.MILE);
+            buffer.writeByte((byte) 4);
+            buffer.writeInt(getVec3());
+
+            // (11+4)*3
+            for (int index = 0; index < (11 + 4) * 3; index++) {
+                buffer.writeByte((byte) 0);
+            }
+
+            byte[] msgBody = new byte[buffer.readableBytes()];
+            buffer.readBytes(msgBody);
+
+            if (this.getEncryptFlag() == Const.SWITCH_ON) {
                 msgBody = Jtt809Util.encrypt(
                         EncryptConfig.getInstance().getM1(),
                         EncryptConfig.getInstance().getIa1(),

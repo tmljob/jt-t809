@@ -14,7 +14,7 @@
 
     <includeBaseDirectory>true</includeBaseDirectory>
     
-    <!-- 把依赖jar包打包进Zip压缩文件的lib目录下 -->
+      <!-- 把依赖jar包打包进Zip压缩文件的lib目录下 -->
     <dependencySets>
         <dependencySet>
             <!--不使用项目的artifact，第三方jar不要解压，打包进zip文件的lib目录-->
@@ -87,16 +87,6 @@
             <fileMode>0644</fileMode>
             <includes>
                 <include>application.properties</include>
-            </includes>
-        </fileSet>
-        
-         <!-- 添加上传文件目录 -->
-        <fileSet>
-            <directory></directory>
-            <outputDirectory>/input</outputDirectory>
-            <fileMode>0644</fileMode>
-            <includes>
-                <include></include>
             </includes>
         </fileSet>
 
