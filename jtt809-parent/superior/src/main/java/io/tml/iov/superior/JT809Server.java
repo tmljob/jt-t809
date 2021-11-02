@@ -16,10 +16,8 @@ import io.tml.iov.superior.handler.JT809ServerInitialzer;
 public class JT809Server {
     private static Logger log = LoggerFactory.getLogger(JT809Server.class);
 
-    private static int PORT;
-
     public static void main(String[] args) {
-        PORT = Integer.parseInt(PropertiesUtil.getProperty("port", "9090"));
+        int port = Integer.parseInt(PropertiesUtil.getProperty("port", "9090"));
         NioEventLoopGroup boosGroup = new NioEventLoopGroup();
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -30,7 +28,7 @@ public class JT809Server {
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .childHandler(new JT809ServerInitialzer());
-        bind(serverBootstrap, PORT);
+        bind(serverBootstrap, port);
     }
 
     private static void bind(final ServerBootstrap serverBootstrap, int port) {

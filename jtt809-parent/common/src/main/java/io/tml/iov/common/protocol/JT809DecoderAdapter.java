@@ -1,7 +1,5 @@
 package io.tml.iov.common.protocol;
 
-import static io.tml.iov.common.util.CommonUtils.PACKET_CACHE;
-
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -11,13 +9,15 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.tml.iov.common.packet.JT809BasePacket;
+import io.tml.iov.common.protocol.decoder.Decoder;
 import io.tml.iov.common.protocol.decoder.DecoderFactory;
 import io.tml.iov.common.util.CommonUtils;
 import io.tml.iov.common.util.CrcUtil;
 import io.tml.iov.common.util.PacketDecoderUtils;
+import io.tml.iov.common.util.ThreadPacketCache;
 
 /**
- *  解码器
+ * 解码器
  */
 public class JT809DecoderAdapter extends ByteToMessageDecoder {
     private static Logger log = LoggerFactory
@@ -45,16 +45,15 @@ public class JT809DecoderAdapter extends ByteToMessageDecoder {
         // 交给具体的解码器
         JT809BasePacket packet = null;
         try {
-            packet = DecoderFactory.getDecoder(msgId).decoder(bytes);
+            Decoder decoder = DecoderFactory.getDecoder(msgId);
+            if (null == decoder) {
+              return;
+            } 
+            packet = decoder.decoder(bytes);
         } catch (Exception e) {
-            if (e instanceof NullPointerException) {
-                // log.info("没有可用的解析器，忽略这条信息！此信息不在业务范围内。");
-                // 没有可用的解析器，忽略这条信息！此信息不在业务范围内。
-            } else {
-                log.error("packet paser error！ error info:{};packet info:{}",
-                        e.getMessage(),
-                        PACKET_CACHE.get(Thread.currentThread().getName()));
-            }
+            log.error("packet paser error！ error info:{};packet info:{}",
+                    e.getMessage(),
+                    ThreadPacketCache.get(Thread.currentThread().getName()));
             return;
         }
         out.add(packet);

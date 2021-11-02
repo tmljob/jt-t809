@@ -1,7 +1,5 @@
 package io.tml.iov.common.util;
 
-import static io.tml.iov.common.util.CommonUtils.PACKET_CACHE;
-
 import io.netty.buffer.ByteBuf;
 import io.tml.iov.common.config.ProtocalVersionConfig;
 import io.tml.iov.common.packet.JT809BasePacket;
@@ -14,14 +12,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PacketDecoderUtils {
 
+    private PacketDecoderUtils() {
+    }
+
     public static byte[] decoderEscape(ByteBuf buf) {
         byte[] originalPacket = CommonUtils.getByteArray(buf);
-       log.info("received packet:{}",bytes2HexStr(originalPacket));
+        log.info("received packet:{}", bytes2HexStr(originalPacket));
         byte[] correctPacket = decoderEscape(originalPacket);
         StringBuilder packetInfo = new StringBuilder();
-        packetInfo.append("original packet：").append(bytes2HexStr(originalPacket))
-                .append(";escaped packet:").append(bytes2HexStr(correctPacket));
-        PACKET_CACHE.put(Thread.currentThread().getName(),
+        packetInfo.append("original packet：")
+                .append(bytes2HexStr(originalPacket)).append(";escaped packet:")
+                .append(bytes2HexStr(correctPacket));
+        ThreadPacketCache.put(Thread.currentThread().getName(),
                 packetInfo.toString());
         return correctPacket;
     }
@@ -32,8 +34,7 @@ public class PacketDecoderUtils {
         dataStr = dataStr.replaceAll("0x5a0x02", "0x5a");
         dataStr = dataStr.replaceAll("0x5e0x01", "0x5d");
         dataStr = dataStr.replaceAll("0x5e0x02", "0x5e");
-        byte[] bytes = fullHexStr2Bytes(dataStr);
-        return bytes;
+        return fullHexStr2Bytes(dataStr);
     }
 
     /**
@@ -43,7 +44,7 @@ public class PacketDecoderUtils {
      * @return HexString
      */
     public static String bytes2HexStr(byte[] array) {
-        StringBuffer sb = new StringBuffer(array.length);
+        StringBuilder sb = new StringBuilder(array.length);
         String sTemp;
         for (int i = 0; i < array.length; i++) {
             sTemp = Integer.toHexString(0xFF & array[i]);
@@ -62,7 +63,7 @@ public class PacketDecoderUtils {
      * @return HexString
      */
     public static String bytes2FullHexStr(byte[] array) {
-        StringBuffer sb = new StringBuffer(array.length);
+        StringBuilder sb = new StringBuilder(array.length);
         sb.append("0x");
         String sTemp;
         for (int i = 0; i < array.length; i++) {
@@ -108,8 +109,7 @@ public class PacketDecoderUtils {
     }
 
     private static int toByte(char c) {
-        byte b = (byte) "0123456789ABCDEF".indexOf(c);
-        return b;
+       return "0123456789ABCDEF".indexOf(c);
     }
 
     /**
@@ -118,8 +118,7 @@ public class PacketDecoderUtils {
      * @param bytes
      * @param packet
      */
-    public static ByteBuf baseDecoder(byte[] bytes, JT809BasePacket packet)
-            throws Exception {
+    public static ByteBuf baseDecoder(byte[] bytes, JT809BasePacket packet) {
         ByteBuf byteBuf = CommonUtils.getByteBuf(bytes);
         byteBuf.skipBytes(1);
         packet.setMsgLength(byteBuf.readInt());
@@ -131,12 +130,12 @@ public class PacketDecoderUtils {
         packet.setVersionFlag(versionFlag);
         packet.setEncryptFlag(byteBuf.readByte());
         packet.setEncryptKey(byteBuf.readInt());
-        
+
         if (ProtocalVersionConfig.getInstance().getVersion()
                 .equalsIgnoreCase(Const.ProtocalVersion.VERSION_2019)) {
             byteBuf.skipBytes(8);
         }
-        
+
         return byteBuf;
     }
 

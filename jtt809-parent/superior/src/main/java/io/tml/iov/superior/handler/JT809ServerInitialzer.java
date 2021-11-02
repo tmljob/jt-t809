@@ -15,7 +15,8 @@ public class JT809ServerInitialzer extends ChannelInitializer<NioSocketChannel> 
 
     @Override
     protected void initChannel(NioSocketChannel ch) throws Exception {
-        ByteBuf delimiter = Unpooled.copiedBuffer(new byte[]{0x5d});
+        byte[] end = new byte[]{0x5d};
+        ByteBuf delimiter = Unpooled.copiedBuffer(end);
         //in&out bound
         ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
         //in-bound

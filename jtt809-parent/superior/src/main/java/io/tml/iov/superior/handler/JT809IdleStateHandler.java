@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
-
 public class JT809IdleStateHandler extends IdleStateHandler {
-    private static Logger log = LoggerFactory.getLogger(JT809IdleStateHandler.class);
+    private static Logger log = LoggerFactory
+            .getLogger(JT809IdleStateHandler.class);
 
     private static final int READER_IDLE_TIME = 60;
 
@@ -20,7 +20,7 @@ public class JT809IdleStateHandler extends IdleStateHandler {
 
     @Override
     protected void channelIdle(ChannelHandlerContext ctx, IdleStateEvent evt) {
-        log.info(READER_IDLE_TIME + "秒内未读到数据，关闭连接");
+        log.info("{}秒内未读到数据，关闭连接", READER_IDLE_TIME);
         ctx.channel().close();
     }
 }

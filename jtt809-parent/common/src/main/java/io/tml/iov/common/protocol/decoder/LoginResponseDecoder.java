@@ -14,14 +14,14 @@ import lombok.extern.slf4j.Slf4j;
 public class LoginResponseDecoder implements Decoder {
 
     @Override
-    public JT809BasePacket decoder(byte[] bytes) throws Exception {
+    public JT809BasePacket decoder(byte[] bytes)  {
         JT809LoginResponsePacket loginResponsePacket = new JT809LoginResponsePacket();
         ByteBuf byteBuf = PacketDecoderUtils.baseDecoder(bytes, loginResponsePacket);
         loginResponsePacketDecoder(byteBuf, loginResponsePacket);
         return loginResponsePacket;
     }
     
-    private void loginResponsePacketDecoder(ByteBuf byteBuf,JT809LoginResponsePacket loginResponsePacket) throws Exception{
+    private void loginResponsePacketDecoder(ByteBuf byteBuf,JT809LoginResponsePacket loginResponsePacket) {
         ByteBuf msgBodyBuf = null;
         if (loginResponsePacket.getEncryptFlag() == Const.Encrypt.NO) {
             log.info("packet no encry, contine to process.");
@@ -36,7 +36,7 @@ public class LoginResponseDecoder implements Decoder {
             msgBodyBuf = CommonUtils.getByteBuf(msgBodyArr);
         }
 
-        loginResponsePacket.setResult(msgBodyBuf.readByte());;
+        loginResponsePacket.setResult(msgBodyBuf.readByte());
 
        
     }

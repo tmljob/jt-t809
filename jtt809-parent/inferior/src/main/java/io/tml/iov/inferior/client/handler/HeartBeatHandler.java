@@ -17,20 +17,21 @@ import lombok.extern.slf4j.Slf4j;
 public class HeartBeatHandler extends ChannelInboundHandlerAdapter {
 
     private TCPClient809 client;
-    
+
     public HeartBeatHandler(TCPClient809 client809) {
         this.client = client809;
-        
+
     }
-    
+
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt)
             throws Exception {
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
 
-            if (StringUtils.isBlank(DataSender.LONGINSTATUS)
-                    || DataSender.LOGINING.equals(DataSender.LONGINSTATUS)) {
+            if (StringUtils.isBlank(DataSender.getInstance().getLoginStatus())
+                    || DataSender.LOGINING.equals(
+                            DataSender.getInstance().getLoginStatus())) {
                 DataSender.getInstance().login2Superior();
                 log.info(
                         "try to login when the channel is idel ------ reday to login");
@@ -44,12 +45,11 @@ public class HeartBeatHandler extends ChannelInboundHandlerAdapter {
         }
 
     }
-    
+
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
         client.doConnect();
     }
-
 
 }

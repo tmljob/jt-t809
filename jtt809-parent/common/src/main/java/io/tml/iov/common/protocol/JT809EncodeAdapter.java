@@ -30,8 +30,6 @@ public class JT809EncodeAdapter extends MessageToByteEncoder<JT809BasePacket> {
             log.info("send packet:{}", hexStr);
             out.writeBytes(bytes);
             
-//            out.retain();
-//            ctx.writeAndFlush(out);
             ctx.flush();
         } catch (Exception e) {
             log.error("JT809EncodeAdapter encode error!", e);

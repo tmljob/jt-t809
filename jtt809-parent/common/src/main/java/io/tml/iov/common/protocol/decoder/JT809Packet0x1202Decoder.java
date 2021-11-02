@@ -1,7 +1,5 @@
 package io.tml.iov.common.protocol.decoder;
 
-import static io.tml.iov.common.util.CommonUtils.PACKET_CACHE;
-
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,15 +17,15 @@ import io.tml.iov.common.packet.JT809Packet0x1202;
 import io.tml.iov.common.util.CommonUtils;
 import io.tml.iov.common.util.Jtt809Util;
 import io.tml.iov.common.util.PacketDecoderUtils;
+import io.tml.iov.common.util.ThreadPacketCache;
 import io.tml.iov.common.util.constant.Const;
-
 
 public class JT809Packet0x1202Decoder implements Decoder {
     private static Logger log = LoggerFactory
             .getLogger(JT809Packet0x1202Decoder.class);
 
     @Override
-    public JT809BasePacket decoder(byte[] bytes) throws Exception {
+    public JT809BasePacket decoder(byte[] bytes) {
         JT809Packet0x1202 jt809Packet0x1202 = new JT809Packet0x1202();
         ByteBuf byteBuf = PacketDecoderUtils.baseDecoder(bytes,
                 jt809Packet0x1202);
@@ -35,8 +33,7 @@ public class JT809Packet0x1202Decoder implements Decoder {
         return jt809Packet0x1202;
     }
 
-    private void packetDecoder(ByteBuf byteBuf, JT809Packet0x1202 packet)
-            throws Exception {
+    private void packetDecoder(ByteBuf byteBuf, JT809Packet0x1202 packet) {
         ByteBuf msgBodyBuf = null;
         if (packet.getEncryptFlag() == Const.Encrypt.NO) {
             msgBodyBuf = PacketDecoderUtils.getMsgBodyBuf(byteBuf);
@@ -50,41 +47,19 @@ public class JT809Packet0x1202Decoder implements Decoder {
                     PacketDecoderUtils.getMsgBodyByteArr(byteBuf));
             msgBodyBuf = CommonUtils.getByteBuf(msgBodyArr);
         }
-        
+
         if (ProtocalVersionConfig.getInstance().getVersion()
                 .equalsIgnoreCase(Const.ProtocalVersion.VERSION_2019)) {
             decodePrt2019(packet, msgBodyBuf);
         } else {
             decodePrt2011(packet, msgBodyBuf);
         }
-      
+
     }
 
     private void decodePrt2011(JT809Packet0x1202 packet, ByteBuf msgBodyBuf) {
-        // 车牌号
-        byte[] vehicleNoBytes = new byte[21];
-        msgBodyBuf.readBytes(vehicleNoBytes);
-        packet.setVehicleNo(
-                new String(vehicleNoBytes, Charset.forName("GBK")).trim());
-        // 车辆颜色
-        packet.setVehicleColor(msgBodyBuf.readByte());
-        // 子业务类型标识
-        packet.setDataType(msgBodyBuf.readShort());
-        // 如果不是定位的数据，抛出空指针错误,解码适配器会对空指针错误做处理。
-        if (packet
-                .getDataType() != Const.SubBusinessDataType.UP_EXG_MSG_REAL_LOCATION) {
-            throw new NullPointerException();
-        }
-        // 后续数据长度
-        packet.setDataLength(msgBodyBuf.readInt());
-        // 经纬度信息是否按国标进行加密
-        packet.setExcrypt(msgBodyBuf.readByte());
-        if (packet.getExcrypt() == Const.Encrypt.YES) {
-            log.error("lon/lat info is encry, packet is {}",
-                    PACKET_CACHE.get(Thread.currentThread().getName()));
-        }
-        // 跳过时间
-//        msgBodyBuf.skipBytes(7);
+        parserDataHead(packet, msgBodyBuf);
+        // 读取时间
         int day = Byte.toUnsignedInt(msgBodyBuf.readByte());
         int month = Byte.toUnsignedInt(msgBodyBuf.readByte());
         packet.setDate(LocalDate.of(msgBodyBuf.readShort(), month, day));
@@ -109,8 +84,8 @@ public class JT809Packet0x1202Decoder implements Decoder {
         // 报警状态
         packet.setAlarm(msgBodyBuf.readInt());
     }
-    
-    private void decodePrt2019(JT809Packet0x1202 packet, ByteBuf msgBodyBuf) {
+
+    private void parserDataHead(JT809Packet0x1202 packet, ByteBuf msgBodyBuf) {
         // 车牌号
         byte[] vehicleNoBytes = new byte[21];
         msgBodyBuf.readBytes(vehicleNoBytes);
@@ -131,12 +106,16 @@ public class JT809Packet0x1202Decoder implements Decoder {
         packet.setExcrypt(msgBodyBuf.readByte());
         if (packet.getExcrypt() == Const.Encrypt.YES) {
             log.error("lon/lat info is encry, packet is {}",
-                    PACKET_CACHE.get(Thread.currentThread().getName()));
+                    ThreadPacketCache.get(Thread.currentThread().getName()));
         }
-        
-        //车辆定位信息数据长度
+    }
+
+    private void decodePrt2019(JT809Packet0x1202 packet, ByteBuf msgBodyBuf) {
+        parserDataHead(packet, msgBodyBuf);
+
+        // 车辆定位信息数据长度
         int locLen = msgBodyBuf.readInt();
-        //跳过报警标志&状态4+4
+        // 跳过报警标志&状态4+4
         msgBodyBuf.skipBytes(8);
         // 纬度、经度
         packet.setLat(msgBodyBuf.readInt());
@@ -147,7 +126,7 @@ public class JT809Packet0x1202Decoder implements Decoder {
         packet.setVec1(msgBodyBuf.readShort());
         // 方向
         packet.setDirection(msgBodyBuf.readShort());
-        //时间
+        // 时间
         byte[] bcdTime = new byte[6];
         msgBodyBuf.readBytes(bcdTime);
         String bcdTimeStr = PacketDecoderUtils.bytes2HexStr(bcdTime);
@@ -155,22 +134,22 @@ public class JT809Packet0x1202Decoder implements Decoder {
         LocalDateTime localDateTime = LocalDateTime.parse(bcdTimeStr, df);
         packet.setDate(localDateTime.toLocalDate());
         packet.setTime(localDateTime.toLocalTime());
-     
-       // 位置附加信息解析
+
+        // 位置附加信息解析
         int locAttachLen = locLen - 28;
-        while(locAttachLen > 0 ) {
+        while (locAttachLen > 0) {
             byte attchId = msgBodyBuf.readByte();
             byte attchLen = msgBodyBuf.readByte();
             ByteBuf attchInfo = msgBodyBuf.readBytes(attchLen);
-            
-            if(Const.LocAttachInfo.MILE == attchId) {
+
+            if (Const.LocAttachInfo.MILE == attchId) {
                 packet.setVec3(attchInfo.readInt());
             }
-            
-            locAttachLen = locAttachLen -1 -1 - attchLen;
+
+            locAttachLen = locAttachLen - 1 - 1 - attchLen;
         }
-        
-        //(11+4)*5
+
+        // (11+4)*5
         msgBodyBuf.skipBytes(45);
     }
 

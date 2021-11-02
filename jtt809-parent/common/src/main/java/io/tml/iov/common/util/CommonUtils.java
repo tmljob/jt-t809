@@ -4,20 +4,20 @@ import java.io.ByteArrayOutputStream;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.tml.iov.common.exception.BizProcessException;
+import lombok.extern.slf4j.Slf4j;
 
-
+@Slf4j
 public class CommonUtils {
-    /** 当前线程报文的缓存，以备出错时，打印或记录，方便后期定位 */
-    public static Map<String, String> PACKET_CACHE = new HashMap<>();
+
+    private CommonUtils() {
+    }
 
     public static ByteBuf getByteBuf(byte[] bytes) {
-        ByteBuf byteBuf = Unpooled.copiedBuffer(bytes);
-        return byteBuf;
+        return Unpooled.copiedBuffer(bytes);
     }
 
     public static byte[] getByteArray(ByteBuf byteBuf) {
@@ -37,7 +37,7 @@ public class CommonUtils {
      */
     public static byte[] append(byte[] first, byte[] back) {
         if (null == first || null == back) {
-            return null;
+            return new byte[0];
         }
         int length = first.length + back.length;
         byte[] res = new byte[length];
@@ -149,7 +149,7 @@ public class CommonUtils {
     public static String bytes2bitStr(byte[] bytes) {
         StringBuilder stringBuilder = new StringBuilder();
         for (byte b : bytes) {
-            stringBuilder.append(byte2bitStr(b));
+            stringBuilder.append(byte2BinaryStr(b));
         }
         return stringBuilder.toString();
     }
@@ -160,11 +160,14 @@ public class CommonUtils {
      * @param b
      * @return 二进制字符串
      */
-    public static String byte2bitStr(byte b) {
-        return "" + (byte) ((b >> 7) & 0x1) + (byte) ((b >> 6) & 0x1)
-                + (byte) ((b >> 5) & 0x1) + (byte) ((b >> 4) & 0x1)
-                + (byte) ((b >> 3) & 0x1) + (byte) ((b >> 2) & 0x1)
-                + (byte) ((b >> 1) & 0x1) + (byte) ((b >> 0) & 0x1);
+    public static String byte2BinaryStr(byte b) {
+        StringBuilder result = new StringBuilder();
+        byte a = b;
+        for (int i = 0; i < 8; i++) {
+            result.append(a % 2);
+            a = (byte) (a / 2);
+        }
+        return result.reverse().toString();
     }
 
     /**
@@ -174,8 +177,7 @@ public class CommonUtils {
      * @return short
      */
     public static short bytes2Short(byte[] bytes) {
-        short z = (short) ((bytes[0] << 8) | (bytes[1] & 0xFF));
-        return z;
+        return (short) ((bytes[0] << 8) | (bytes[1] & 0xFF));
     }
 
     /**
@@ -195,7 +197,7 @@ public class CommonUtils {
         }
         return n;
     }
-    
+
     public static byte[] getBytesWithLengthAfter(int length, byte[] pwdByte) {
         byte[] lengthByte = new byte[length];
         for (int i = 0; i < pwdByte.length; i++) {
@@ -206,10 +208,9 @@ public class CommonUtils {
         }
         return lengthByte;
     }
-    
+
     /**
-     * 16进制字符串转换成byte数组
-     * byte[]
+     * 16进制字符串转换成byte数组 byte[]
      *
      * @param hex
      * @return 2016年10月12日 by fox_mt
@@ -221,53 +222,48 @@ public class CommonUtils {
         char[] achar = hex.toCharArray();
         for (int i = 0; i < len; i++) {
             int pos = i * 2;
-            result[i] = (byte) (toByte(achar[pos]) << 4 | toByte(achar[pos + 1]));
+            result[i] = (byte) (toByte(achar[pos]) << 4
+                    | (toByte(achar[pos + 1]) & 0xff));
         }
         return result;
     }
-    
+
     private static byte toByte(char c) {
-        byte b = (byte) "0123456789ABCDEF".indexOf(c);
-        return b;
+        return (byte) "0123456789ABCDEF".indexOf(c);
     }
-    
-    
-    public static byte[] doEscape4Receive(byte[] bs, int start, int end) throws Exception {
-        if (start < 0 || end > bs.length){
-            throw new ArrayIndexOutOfBoundsException("doEscape4Receive error : index out of bounds(start=" + start
-                    + ",end=" + end + ",bytes length=" + bs.length + ")");
+
+    public static byte[] doEscape4Receive(byte[] bs, int start, int end) {
+        if (start < 0 || end > bs.length) {
+            throw new ArrayIndexOutOfBoundsException(
+                    "doEscape4Receive error : index out of bounds(start="
+                            + start + ",end=" + end + ",bytes length="
+                            + bs.length + ")");
         }
-        ByteArrayOutputStream baos = null;
-        try {
-            baos = new ByteArrayOutputStream();
-            for (int i = start; i < end ; i++) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();) {
+            for (int i = start; i < end; i++) {
                 if (bs[i] == 0x5B) {
                     baos.write(0x5A);
                     baos.write(0x01);
                 } else if (bs[i] == 0x5A) {
                     baos.write(0x5A);
                     baos.write(0x02);
-                } else if(bs[i] == 0x5D){
+                } else if (bs[i] == 0x5D) {
                     baos.write(0x5E);
                     baos.write(0x01);
-                }else if(bs[i] == 0x5E){
+                } else if (bs[i] == 0x5E) {
                     baos.write(0x5E);
                     baos.write(0x02);
-                }else{
+                } else {
                     baos.write(bs[i]);
                 }
             }
             return baos.toByteArray();
         } catch (Exception e) {
-            throw e;
-        } finally {
-            if (baos != null) {
-                baos.close();
-                baos = null;
-            }
+            log.error("doEscape4Receive error.", e);
+            throw new BizProcessException("doEscape4Receive error.");
         }
     }
-    
+
     public static int formatLonLat(Double needFormat) {
         NumberFormat numFormat = NumberFormat.getInstance();
         numFormat.setMaximumFractionDigits(6);

@@ -17,7 +17,7 @@ public abstract class JT809BasePacket {
      * 不算消息体固定为26个字节长度 Head flag + Message Header + CRC Code + End Flag 1 + 22 +
      * 2 + 1 = 26
      */
-    private static Integer FIXED_BYTE_LENGTH = 26;
+    private static Integer fixedByteLength = 26;
 
     /** 头标识 */
     public static final byte HEAD_FLAG = 0x5b;
@@ -38,13 +38,13 @@ public abstract class JT809BasePacket {
     private byte encryptFlag = 0x00;
     /** 数据加密的密匙，长度为 4 个字节 */
     private int encryptKey;
-    
+
     static {
         if (ProtocalVersionConfig.getInstance().getVersion()
                 .equalsIgnoreCase(Const.ProtocalVersion.VERSION_2019)) {
-            FIXED_BYTE_LENGTH = 34;
+            fixedByteLength = 34;
         } else {
-            FIXED_BYTE_LENGTH = 26;
+            fixedByteLength = 26;
         }
     }
 
@@ -79,8 +79,7 @@ public abstract class JT809BasePacket {
                     .longToBytes(System.currentTimeMillis() / 1000);
             bytes6 = CommonUtils.append(bytes6, timestamp);
         }
-        byte[] bytes = CommonUtils.append(bytes6, getMsgBodyByteArr());
-        return bytes;
+        return CommonUtils.append(bytes6, getMsgBodyByteArr());
     }
 
     /**
@@ -91,13 +90,12 @@ public abstract class JT809BasePacket {
     public byte[] getAllBody() {
         byte[] needCRCBody = getNeedCRCBody();
         short crc16 = (short) CrcUtil.getCRC16(needCRCBody);
-        byte[] crcCode = CommonUtils.short2Bytes(crc16);
-        byte[] bytes = CommonUtils.append(needCRCBody, crcCode);
-        return bytes;
+        byte[] crcBytes = CommonUtils.short2Bytes(crc16);
+        return CommonUtils.append(needCRCBody, crcBytes);
     }
 
     public static int getFixedByteLength() {
-        return FIXED_BYTE_LENGTH;
+        return fixedByteLength;
     }
 
     public static byte getHeadFlag() {

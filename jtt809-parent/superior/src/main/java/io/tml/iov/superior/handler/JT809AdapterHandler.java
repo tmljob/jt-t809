@@ -14,13 +14,13 @@ public class JT809AdapterHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        log.info("{}客户端已连接",ctx.name());
+        log.info("{}客户端已连接",ctx);
         super.channelRegistered(ctx);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        log.info("{}客户端关闭",ctx.name());
+        log.info("{}客户端关闭",ctx);
         super.channelInactive(ctx);
     }
 

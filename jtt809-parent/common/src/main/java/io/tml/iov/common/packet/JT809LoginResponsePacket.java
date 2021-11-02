@@ -19,7 +19,6 @@ public class JT809LoginResponsePacket extends JT809BasePacket {
         setMsgSn(Const.getMsgSN());
         setMsgId(Const.BusinessDataType.UP_CONNECT_RSP);
         setMsgGNSSCenterId(PropertiesUtil.getInteger("netty.server.centerId"));
-//        setVersionFlag(new byte[] { 1, 0, 0 });
         // 加密配置
         setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
         setEncryptKey(RandomUtils.genNumByLen(Const.Encrypt.ENCRYPTKEY_LEN));

@@ -37,7 +37,6 @@ public class JT809Packet0x1202 extends JT809BasePacket {
         setMsgSn(Const.getMsgSN());
         setMsgId(Const.BusinessDataType.UP_EXG_MSG);
         setMsgGNSSCenterId(PropertiesUtil.getInteger("netty.server.centerId"));
-//        setVersionFlag(new byte[] { 1, 0, 0 });
         // 加密配置
         setEncryptFlag((byte) EncryptConfig.getInstance().getEncryptFlag());
         setEncryptKey(RandomUtils.genNumByLen(Const.Encrypt.ENCRYPTKEY_LEN));
@@ -251,8 +250,8 @@ public class JT809Packet0x1202 extends JT809BasePacket {
             // 海拔
             buffer.writeShort(getAltitude());// 2
             // 车辆状态
-            int accStatus = 0;
-            int gpsStatus = 0;
+            int accStatus = RandomUtils.genNumIncludeMinAndMax(0, 1);
+            int gpsStatus = RandomUtils.genNumIncludeMinAndMax(0, 1);
             if (accStatus == 0 && gpsStatus == 0) {
                 buffer.writeInt(0);// 4
             } else if (accStatus == 1 && gpsStatus == 0) {

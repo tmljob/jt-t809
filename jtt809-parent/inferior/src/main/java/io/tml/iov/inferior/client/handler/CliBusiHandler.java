@@ -17,10 +17,9 @@ public class CliBusiHandler
         log.info("respond----------------" + "0x"
                 + Integer.toHexString(msg.getMsgId()));
         if (msg.getMsgId() == Const.BusinessDataType.UP_CONNECT_RSP) {
-//            byte[] msgBody = msg.getMsgBodyByteArr();
             int result = msg.getResult();
             if (result == Const.LoginResponseCode.SUCCESS) {
-                DataSender.LONGINSTATUS = Constants.LOGIN_SUCCESS;
+                DataSender.getInstance().setLoginStatus(Constants.LOGIN_SUCCESS);
 
                 synchronized (DataSender.class) {
                     DataSender.class.notifyAll();

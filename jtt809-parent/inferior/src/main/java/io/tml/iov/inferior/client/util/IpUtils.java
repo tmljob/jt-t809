@@ -14,21 +14,23 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class IpUtils implements Interceptor {
-
     
+    private IpUtils() {
+    }
+
     public static String getIpAddress() {
         try {
           Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
           InetAddress ip = null;
           while (allNetInterfaces.hasMoreElements()) {
-            NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
+            NetworkInterface netInterface =  allNetInterfaces.nextElement();
             if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
-              continue;
+               log.info("skip......");
             } else {
               Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
               while (addresses.hasMoreElements()) {
                 ip = addresses.nextElement();
-                if (ip != null && ip instanceof Inet4Address) {
+                if (ip instanceof Inet4Address) {
                   return ip.getHostAddress();
                 }
               }

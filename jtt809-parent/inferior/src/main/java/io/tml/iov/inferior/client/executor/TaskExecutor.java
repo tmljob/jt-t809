@@ -6,7 +6,9 @@ import java.time.LocalTime;
 import io.tml.iov.common.packet.JT809Packet0x1202;
 import io.tml.iov.common.util.CommonUtils;
 import io.tml.iov.inferior.client.DataSender;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class TaskExecutor {
 
     public static void main(String[] args) {
@@ -22,16 +24,16 @@ public class TaskExecutor {
         location.setDate(LocalDate.now());
         location.setTime(LocalTime.now());
         location.setVec3(88);
-        
+
         s.sendMsg2Gov(location);
-        while (true) {
-            try {
-                Thread.sleep(20 * 1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            s.sendMsg2Gov(location);
+
+        try {
+            Thread.sleep(20 * 1000L);
+        } catch (InterruptedException e) {
+            log.error("TaskExecutor error.", e);
+            Thread.currentThread().interrupt();
         }
+        s.sendMsg2Gov(location);
 
     }
 

@@ -13,6 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PathHelper {
+    
+    private PathHelper() {
+    }
 
     /**
      * 获获取当前jar包所在目录
@@ -24,19 +27,19 @@ public class PathHelper {
             path = path.substring(1);
         }
         if (path.contains("jar")) {
-            path = path.substring(0, path.lastIndexOf("."));
-            return path.substring(0, path.lastIndexOf("/"));
+            path = path.substring(0, path.lastIndexOf('.'));
+            return path.substring(0, path.lastIndexOf('/'));
         }
 
         return path.replace("target/classes/", "");
     }
 
     public static List<String> getFiles(String path, String suffix) {
-        List<String> files = new ArrayList<String>();
+        List<String> files = new ArrayList<>();
         Path normallizePath = Paths.get(new File(path).toURI());
         try (Stream<Path> walk = Files.walk(normallizePath)) {
 
-            List<String> filters = walk.map(x -> x.toString())
+            List<String> filters = walk.map(Path::toString)
                     .filter(f -> f.endsWith(suffix))
                     .collect(Collectors.toList());
             if (null != filters && !filters.isEmpty()) {

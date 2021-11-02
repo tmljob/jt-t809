@@ -21,7 +21,7 @@ public class LoginDecoder implements Decoder {
     private static Logger log = LoggerFactory.getLogger(LoginDecoder.class);
 
     @Override
-    public JT809BasePacket decoder(byte[] bytes) throws Exception {
+    public JT809BasePacket decoder(byte[] bytes)  {
         JT809LoginPacket loginPacket = new JT809LoginPacket();
         ByteBuf byteBuf = PacketDecoderUtils.baseDecoder(bytes, loginPacket);
         loginPacketDecoder(byteBuf,loginPacket);
@@ -33,7 +33,7 @@ public class LoginDecoder implements Decoder {
      * @param byteBuf
      * @param loginPacket
      */
-    private void loginPacketDecoder(ByteBuf byteBuf,JT809LoginPacket loginPacket) throws Exception{
+    private void loginPacketDecoder(ByteBuf byteBuf,JT809LoginPacket loginPacket) {
         ByteBuf msgBodyBuf = null;
         if (loginPacket.getEncryptFlag() == Const.Encrypt.NO) {
             log.info("packet no encry, contine to process.");
@@ -54,7 +54,6 @@ public class LoginDecoder implements Decoder {
         msgBodyBuf.readBytes(passwordBytes);
         loginPacket.setPassword(new String(passwordBytes, Charset.forName("GBK")));
 
-        // TODO ip和端口号的解析待确定
         byte[] downLinkIpBytes = new byte[32];
         msgBodyBuf.readBytes(downLinkIpBytes);
         loginPacket.setDownLinkIp(new String(downLinkIpBytes));

@@ -1,11 +1,17 @@
 package io.tml.iov.common.util;
 
+import java.security.SecureRandom;
 import java.util.Random;
 
 /**
  * 随机数工具类
  */
 public class RandomUtils {
+    
+    private RandomUtils() {
+    }
+    
+    private static Random random = new SecureRandom();
     
     /**
      * 生成指定区间随机数 (min, max)
@@ -18,7 +24,6 @@ public class RandomUtils {
             // 自行异常处理, 此时简单返回0
             return 0;
         }
-        Random random = new Random();
         return random.nextInt(max - min - 1) + min + 1;
     }
     
@@ -33,7 +38,6 @@ public class RandomUtils {
             // 自行异常处理, 此时简单返回0
             return 0;
         }
-        Random random = new Random();
         return random.nextInt(max - min) + min;
     }
     
@@ -58,7 +62,6 @@ public class RandomUtils {
             // 自行异常处理, 此时简单返回0
             return 0;
         }
-        Random random = new Random();
         return random.nextInt(max - min + 1) + min;
     }
     

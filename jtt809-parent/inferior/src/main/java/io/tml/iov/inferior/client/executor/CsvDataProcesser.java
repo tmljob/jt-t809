@@ -3,7 +3,10 @@ package io.tml.iov.inferior.client.executor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -71,10 +74,8 @@ public class CsvDataProcesser {
     public static void main(String[] args) {
         int enableDateColumn = PropertiesUtil
                 .getInteger("mock.input.data.date");
-        int csvColumn = enableDateColumn == Const.SWITCH_ON
-                ? CSV_COLUMN_PLUS_LIMIT
-                : CSV_COLUMN_LIMIT;
-        boolean plusDate = enableDateColumn == Const.SWITCH_ON ? true : false;
+        int csvColumn = getCsvColumn(enableDateColumn);
+        boolean plusDate = enableDateColumn == Const.SWITCH_ON;
         String inputPath = System.getProperty("user.dir") + File.separator
                 + INPUT_DIR;
         log.info("csv path info|{}", inputPath);
@@ -83,96 +84,127 @@ public class CsvDataProcesser {
         downLinkServer.starDownLinkServer();
 
         DataSender sender = DataSender.getInstance();
-        while(true) {
-            if(sender.channelAvaliable()) {
+        waitForChannelSetUp(sender);
+
+        synchronized (DataSender.class) {
+            boolean waitLogin = true;
+            while (waitLogin) {
+                try {
+                    DataSender.class.wait();
+                } catch (Exception e) {
+                    log.error("wait to login error.", e);
+                }
+                waitLogin = false;
+            }
+        }
+
+        execute(csvColumn, plusDate, inputPath, sender);
+    }
+
+    private static void execute(int csvColumn, boolean plusDate,
+            String inputPath, DataSender sender) {
+        while (true) {
+            List<String> csvFiles = PathHelper.getFiles(inputPath, SUFFIX);
+            if (csvFiles.isEmpty()) {
+                threadSleep();
+                continue;
+            }
+
+            log.info("csv processer scan files:{}", csvFiles);
+            StatCount statCount = new StatCount();
+            boolean sendResult = true;
+            for (String path : csvFiles) {
+                try (BufferedReader br = new BufferedReader(
+                        new InputStreamReader(new FileInputStream(path),
+                                "GBK"));) {
+                    log.info("start process file:{}", path);
+                    String line = null;
+                    String[] locArray = null;
+                    int lineNum = 0;
+                    while ((line = br.readLine()) != null) {
+                        lineNum++;
+                        locArray = line.split(",|\t");
+                        if (isSkipLine(csvColumn, locArray, lineNum)) {
+                            logParseFile(csvColumn, path, locArray, lineNum);
+                            continue;
+                        }
+
+                        JT809Packet0x1202 location = buildLocation(locArray,
+                                plusDate);
+                        checkChannelAvaliable(sender);
+                        sendResult &= sender.sendMsg2Gov(location);
+
+                        statCount.judeResult(sendResult);
+                    }
+
+                } catch (Exception e2) {
+                    log.error("CsvDataProcesser open file error", e2);
+                }
+            }
+
+            log.info("data send success cnt:{}", statCount.getSucessCnt());
+            log.info("data send fail cnt:{}", statCount.getFailCnt());
+
+            cleanDoneFile(csvFiles);
+
+        }
+    }
+
+    private static void threadSleep() {
+        try {
+            Thread.sleep(60 * 1000L);
+        } catch (InterruptedException e) {
+            log.error("CsvDataProcesser run error", e);
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private static boolean isSkipLine(int csvColumn, String[] locArray,
+            int lineNum) {
+        return lineNum == 1 || locArray.length < csvColumn;
+    }
+
+    private static void logParseFile(int csvColumn, String path,
+            String[] locArray, int lineNum) {
+        if (locArray.length < csvColumn) {
+            log.info("data parser error,File:{},line num:{}", path, lineNum);
+        }
+    }
+
+    private static void checkChannelAvaliable(DataSender sender) {
+        while (!sender.channelAvaliable()) {
+            try {
+                log.info("channel is not avaliable,wait 30s");
+                Thread.sleep(30 * 1000L);
+            } catch (InterruptedException e) {
+                log.error("CsvDataProcesser channelAvaliable error", e);
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private static void cleanDoneFile(List<String> csvFiles) {
+        csvFiles.forEach(path -> {
+            try {
+                Files.delete(Paths.get(path));
+            } catch (IOException e) {
+                log.error("cleanDoneFile {} error", path);
+            }
+        });
+    }
+
+    private static void waitForChannelSetUp(DataSender sender) {
+        while (true) {
+            if (sender.channelAvaliable()) {
                 sender.login2Superior();
                 break;
             }
         }
-      
+    }
 
-        synchronized (DataSender.class) {
-            try {
-                DataSender.class.wait();
-            } catch (Exception e) {
-                log.error("wait to login error.", e);
-            }
-        }
-
-        new Thread(() -> {
-            while (true) {
-                List<String> csvFiles = PathHelper.getFiles(inputPath, SUFFIX);
-                if (csvFiles.isEmpty()) {
-                    try {
-                        Thread.sleep(60 * 1000);
-                    } catch (InterruptedException e) {
-                        log.error("CsvDataProcesser run error", e);
-                    }
-                    continue;
-                }
-
-                log.info("csv processer scan files:{}", csvFiles);
-                int sucessCnt = 0;
-                int failCnt = 0;
-                boolean sendResult = true;
-                for (String path : csvFiles) {
-                    try (BufferedReader br = new BufferedReader(
-                            new InputStreamReader(new FileInputStream(path),
-                                    "GBK"));) {
-                        log.info("start process file:{}", path);
-                        String line = null;
-                        String[] locArray = null;
-                        int lineNum = 0;
-                        while ((line = br.readLine()) != null) {
-                            lineNum++;
-                            locArray = line.split(",|\t");
-                            if (lineNum == 1 || locArray.length < csvColumn) {
-                                if (locArray.length < csvColumn) {
-                                    log.info(
-                                            "data parser error,File:{},line num:{}",
-                                            path, lineNum);
-                                }
-                                continue;
-                            }
-
-                            JT809Packet0x1202 location = buildLocation(locArray,
-                                    plusDate);
-                            
-                            while(!sender.channelAvaliable()) {
-                                try {
-                                    log.info("channel is not avaliable,wait 30s");
-                                    Thread.sleep(30 * 1000);
-                                } catch (InterruptedException e) {
-                                    log.error(
-                                            "CsvDataProcesser channelAvaliable error",
-                                            e);
-                                }
-                            }
-
-                            sendResult &= sender.sendMsg2Gov(location);
-
-                            if (sendResult) {
-                                sucessCnt++;
-                            } else {
-                                failCnt++;
-                            }
-                        }
-
-                    } catch (Exception e2) {
-                        log.error("CsvDataProcesser open file error", e2);
-                    }
-                }
-
-                log.info("data send success cnt:{}", sucessCnt);
-                log.info("data send fail cnt:{}", failCnt);
-
-                    csvFiles.forEach(path -> {
-                        File file = new File(path);
-                        file.delete();
-                    });  
-              
-            }
-        }).start();
+    private static int getCsvColumn(int enableDateColumn) {
+        return enableDateColumn == Const.SWITCH_ON ? CSV_COLUMN_PLUS_LIMIT
+                : CSV_COLUMN_LIMIT;
     }
 
 }

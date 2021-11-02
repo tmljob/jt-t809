@@ -5,14 +5,19 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import com.google.common.base.Strings;
 
+import io.tml.iov.common.exception.BizProcessException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PropertiesUtil {
+
+    private PropertiesUtil() {
+    }
 
     private static Properties props;
 
@@ -29,7 +34,7 @@ public class PropertiesUtil {
                     ? new FileInputStream(configFile)
                     : PropertiesUtil.class.getClassLoader()
                             .getResourceAsStream(fileName);
-            props.load(new InputStreamReader(in, "UTF-8"));
+            props.load(new InputStreamReader(in, StandardCharsets.UTF_8));
         } catch (IOException e) {
             log.error("配置文件读取异常", e);
         }
@@ -56,7 +61,7 @@ public class PropertiesUtil {
     public static int getInteger(String key) {
         String value = props.getProperty(key.trim());
         if (Strings.isNullOrEmpty(value)) {
-            throw new RuntimeException("没有配置属性：" + key);
+            throw new BizProcessException("没有配置属性：" + key);
         }
         return Integer.parseInt(value.trim());
     }

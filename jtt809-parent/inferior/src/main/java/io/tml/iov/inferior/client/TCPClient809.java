@@ -106,19 +106,17 @@ public class TCPClient809 {
                         log.info(
                                 "Failed to connect to server, try connect after 10s");
 
-                        futureListener.channel().eventLoop()
-                                .schedule(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        doConnect();
-                                    }
-                                }, 10, TimeUnit.SECONDS);
+                        futureListener.channel().eventLoop().schedule(
+                                instance::doConnect, 10, TimeUnit.SECONDS);
                     }
                 }
             });
+            
+           future.sync();
         } catch (Exception e) {
             log.error("TCPClient809 getChannel error!");
         }
+
     }
 
     public Channel getChannel() {
